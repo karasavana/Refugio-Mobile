@@ -2,11 +2,14 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { Link, LinkProps } from 'expo-router';
 import { PropsWithChildren } from 'react';
 import {
+  Image,
   Pressable,
   PressableProps,
   StyleProp,
   StyleSheet,
   Text,
+  TextInput,
+  TextInputProps,
   TextStyle,
   View,
   ViewStyle,
@@ -44,11 +47,12 @@ export function Card({
 export function Pill({
   children,
   tone = 'green',
-}: PropsWithChildren<{ tone?: 'green' | 'yellow' | 'red' | 'neutral' }>) {
+}: PropsWithChildren<{ tone?: 'green' | 'yellow' | 'red' | 'blue' | 'neutral' }>) {
   const toneStyle = {
     green: styles.greenPill,
     yellow: styles.yellowPill,
     red: styles.redPill,
+    blue: styles.bluePill,
     neutral: styles.neutralPill,
   }[tone];
 
@@ -56,11 +60,20 @@ export function Pill({
 }
 
 export function PetAvatar({ pet, size = 72 }: { pet: Pet; size?: number }) {
-  const backgroundColor = pet.id % 2 === 0 ? palette.blue : palette.green;
+  const uri = pet.photo_path?.startsWith('http') ? pet.photo_path : null;
+
+  if (uri) {
+    return (
+      <View style={[styles.avatarImageWrap, { width: size, height: size, borderRadius: size / 2 }]}>
+        <Image source={{ uri }} style={{ width: size - 8, height: size - 8, borderRadius: (size - 8) / 2 }} />
+      </View>
+    );
+  }
 
   return (
-    <View style={[styles.avatar, { width: size, height: size, borderRadius: size / 2, backgroundColor }]}>
-      <Text style={[styles.avatarText, { fontSize: size * 0.38 }]}>{getInitials(pet.name)}</Text>
+    <View style={[styles.avatar, { width: size, height: size, borderRadius: size / 2 }]}>
+      <Ionicons name="paw-outline" color={palette.white} size={size * 0.36} />
+      <Text style={[styles.avatarText, { fontSize: size * 0.18 }]}>{getInitials(pet.name)}</Text>
     </View>
   );
 }
@@ -97,7 +110,7 @@ export function ShadowButton({
   }
 >) {
   return (
-    <Pressable style={[styles.button, { backgroundColor: color }, style]} {...pressableProps}>
+    <Pressable style={({ pressed }) => [styles.button, { backgroundColor: color }, pressed && styles.pressed, style]} {...pressableProps}>
       <Text style={[styles.buttonText, textStyle]}>{children}</Text>
     </Pressable>
   );
@@ -110,9 +123,7 @@ export function LinkButton({
 }: PropsWithChildren<{ href: LinkProps['href']; style?: StyleProp<ViewStyle> }>) {
   return (
     <Link href={href} asChild>
-      <Pressable style={[styles.button, style]}>
-        <Text style={styles.buttonText}>{children}</Text>
-      </Pressable>
+      <ShadowButton style={style}>{children}</ShadowButton>
     </Link>
   );
 }
@@ -129,12 +140,63 @@ export function Row({
   return (
     <View style={styles.row}>
       <View style={styles.rowLabelWrap}>
-        {icon ? <IconBubble name={icon} size={36} /> : null}
+        {icon ? <IconBubble name={icon} size={34} /> : null}
         <Text style={styles.rowLabel}>{label}</Text>
       </View>
       <Text style={styles.rowValue}>{value}</Text>
     </View>
   );
+}
+
+export function FormField({
+  label,
+  icon,
+  rightIcon,
+  style,
+  ...inputProps
+}: TextInputProps & {
+  label: string;
+  icon: keyof typeof Ionicons.glyphMap;
+  rightIcon?: keyof typeof Ionicons.glyphMap;
+  style?: StyleProp<TextStyle>;
+}) {
+  return (
+    <View style={styles.fieldWrap}>
+      <Text style={styles.fieldLabel}>{label}</Text>
+      <View style={styles.inputShell}>
+        <Ionicons name={icon} color={palette.muted} size={25} />
+        <TextInput
+          placeholderTextColor={palette.muted}
+          style={[styles.input, style]}
+          autoCapitalize="none"
+          autoCorrect={false}
+          {...inputProps}
+        />
+        {rightIcon ? <Ionicons name={rightIcon} color={palette.muted} size={25} /> : null}
+      </View>
+    </View>
+  );
+}
+
+export function BrandIcon({ size = 126, muted = false }: { size?: number; muted?: boolean }) {
+  return (
+    <View
+      style={[
+        styles.brandIcon,
+        {
+          width: size,
+          height: size,
+          borderRadius: size * 0.24,
+          backgroundColor: muted ? 'rgba(255,255,255,0.16)' : palette.green,
+        },
+      ]}>
+      <Ionicons name="paw-outline" color={palette.white} size={size * 0.46} />
+    </View>
+  );
+}
+
+export function AuthBrand() {
+  return <Text style={styles.authBrand}>REFUGIO VETERINARY CLINIC - TUBIGON</Text>;
 }
 
 export const styles = StyleSheet.create({
@@ -149,57 +211,62 @@ export const styles = StyleSheet.create({
   },
   title: {
     color: palette.darkGreen,
-    fontSize: 38,
-    fontWeight: '800',
-    letterSpacing: -1,
+    fontSize: 34,
+    fontWeight: '900',
+    letterSpacing: 0,
   },
   lightText: {
     color: palette.white,
   },
   muted: {
     color: palette.muted,
-    fontSize: 17,
-    lineHeight: 24,
+    fontSize: 16,
+    lineHeight: 23,
   },
   lightMuted: {
-    color: '#D7F8E9',
+    color: palette.mint,
   },
   card: {
     backgroundColor: palette.white,
     borderColor: palette.line,
     borderRadius: 32,
     borderWidth: 1.5,
-    padding: 22,
+    padding: 20,
+    shadowColor: palette.mint,
+    shadowOffset: { width: 0, height: 14 },
+    shadowOpacity: 0.4,
+    shadowRadius: 18,
+    elevation: 2,
   },
   selectedCard: {
-    backgroundColor: palette.mint,
-    borderColor: palette.line,
-    shadowColor: palette.darkGreen,
-    shadowOffset: { width: 0, height: 7 },
-    shadowOpacity: 0.22,
-    shadowRadius: 0,
-    elevation: 5,
+    backgroundColor: palette.mintStrong,
+    borderColor: palette.green,
+    borderWidth: 3,
   },
   pill: {
     alignSelf: 'flex-start',
     borderRadius: 999,
-    fontSize: 16,
-    fontWeight: '800',
+    fontSize: 15,
+    fontWeight: '900',
     overflow: 'hidden',
     paddingHorizontal: 14,
-    paddingVertical: 6,
+    paddingVertical: 7,
   },
   greenPill: {
-    backgroundColor: palette.mint,
-    color: '#0CA865',
+    backgroundColor: '#D4F6E3',
+    color: palette.greenDark,
   },
   yellowPill: {
-    backgroundColor: '#FFF2BD',
-    color: '#E4A600',
+    backgroundColor: palette.yellowPale,
+    color: '#C99400',
   },
   redPill: {
-    backgroundColor: '#FFE2E5',
+    backgroundColor: palette.redPale,
     color: palette.red,
+  },
+  bluePill: {
+    backgroundColor: palette.bluePale,
+    color: palette.blue,
   },
   neutralPill: {
     backgroundColor: '#EEF7F2',
@@ -207,12 +274,19 @@ export const styles = StyleSheet.create({
   },
   avatar: {
     alignItems: 'center',
+    backgroundColor: palette.green,
+    gap: 2,
+    justifyContent: 'center',
+  },
+  avatarImageWrap: {
+    alignItems: 'center',
+    backgroundColor: palette.green,
     justifyContent: 'center',
   },
   avatarText: {
     color: palette.white,
-    fontWeight: '800',
-    letterSpacing: 1,
+    fontWeight: '900',
+    letterSpacing: 0,
   },
   iconBubble: {
     alignItems: 'center',
@@ -221,20 +295,24 @@ export const styles = StyleSheet.create({
   button: {
     alignItems: 'center',
     backgroundColor: palette.green,
-    borderRadius: 28,
+    borderRadius: 32,
     justifyContent: 'center',
-    minHeight: 62,
+    minHeight: 64,
     paddingHorizontal: 24,
-    shadowColor: palette.shadowGreen,
-    shadowOffset: { width: 0, height: 8 },
+    shadowColor: palette.greenDark,
+    shadowOffset: { width: 0, height: 9 },
     shadowOpacity: 1,
     shadowRadius: 0,
     elevation: 6,
   },
+  pressed: {
+    opacity: 0.86,
+    transform: [{ translateY: 2 }],
+  },
   buttonText: {
     color: palette.white,
-    fontSize: 22,
-    fontWeight: '800',
+    fontSize: 21,
+    fontWeight: '900',
   },
   row: {
     alignItems: 'center',
@@ -242,22 +320,64 @@ export const styles = StyleSheet.create({
     borderBottomWidth: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 18,
+    paddingVertical: 16,
   },
   rowLabelWrap: {
     alignItems: 'center',
     flexDirection: 'row',
-    gap: 12,
+    gap: 10,
   },
   rowLabel: {
     color: palette.muted,
-    fontSize: 18,
+    fontSize: 17,
   },
   rowValue: {
     color: palette.darkGreen,
     flex: 1,
-    fontSize: 18,
-    fontWeight: '800',
+    fontSize: 17,
+    fontWeight: '900',
     textAlign: 'right',
+    textTransform: 'capitalize',
+  },
+  fieldWrap: {
+    gap: 12,
+  },
+  fieldLabel: {
+    color: palette.darkGreen,
+    fontSize: 19,
+    fontWeight: '900',
+  },
+  inputShell: {
+    alignItems: 'center',
+    backgroundColor: '#EDF9F4',
+    borderColor: palette.line,
+    borderRadius: 30,
+    borderWidth: 1.5,
+    flexDirection: 'row',
+    gap: 16,
+    minHeight: 68,
+    paddingHorizontal: 22,
+  },
+  input: {
+    color: palette.darkGreen,
+    flex: 1,
+    fontSize: 20,
+    fontWeight: '600',
+  },
+  brandIcon: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: palette.greenDark,
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 6,
+  },
+  authBrand: {
+    color: palette.green,
+    fontSize: 16,
+    fontWeight: '900',
+    letterSpacing: 0.3,
+    textAlign: 'center',
   },
 });

@@ -2,7 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { Card, PetAvatar, Pill, Screen, Title } from '@/components/refugio-ui';
+import { Card, PetAvatar, Pill, Screen } from '@/components/refugio-ui';
 import {
   AppointmentStatus,
   appointments,
@@ -24,13 +24,10 @@ export default function VisitsScreen() {
 
   return (
     <Screen style={styles.screen}>
-      <Title style={styles.title}>Appointments</Title>
+      <Text style={styles.title}>Appointments</Text>
       <View style={styles.segment}>
         {(['upcoming', 'history'] as const).map((value) => (
-          <Text
-            key={value}
-            onPress={() => setMode(value)}
-            style={[styles.segmentButton, mode === value && styles.segmentActive]}>
+          <Text key={value} onPress={() => setMode(value)} style={[styles.segmentButton, mode === value && styles.segmentActive]}>
             {value === 'upcoming' ? 'Upcoming' : 'History'}
           </Text>
         ))}
@@ -41,9 +38,7 @@ export default function VisitsScreen() {
           const pet = findPet(appointment.pet_id);
           const vet = findVet(appointment.veterinarian_id);
 
-          if (!pet || !vet) {
-            return null;
-          }
+          if (!pet || !vet) return null;
 
           return (
             <Card key={appointment.id} style={styles.visitCard}>
@@ -53,21 +48,30 @@ export default function VisitsScreen() {
                 <Ionicons name="chevron-forward" color={palette.muted} size={28} />
               </View>
               <View style={styles.visitBody}>
-                <PetAvatar pet={pet} size={58} />
+                <PetAvatar pet={pet} size={62} />
                 <View style={styles.visitInfo}>
                   <Text style={styles.visitTitle}>{getServiceLabel(appointment.type)}</Text>
                   <Text style={styles.petName}>{pet.name}</Text>
                 </View>
               </View>
               <View style={styles.metaRow}>
-                <Text style={styles.meta}>◷ {formatTime(appointment.appointment_time)}</Text>
-                <Text style={styles.meta}>🩺 {vet.name}</Text>
+                <Meta icon="time-outline" label={formatTime(appointment.appointment_time)} />
+                <Meta icon="medkit-outline" label={vet.name} />
               </View>
             </Card>
           );
         })}
       </ScrollView>
     </Screen>
+  );
+}
+
+function Meta({ icon, label }: { icon: keyof typeof Ionicons.glyphMap; label: string }) {
+  return (
+    <View style={styles.meta}>
+      <Ionicons name={icon} color={palette.muted} size={20} />
+      <Text style={styles.metaText}>{label}</Text>
+    </View>
   );
 }
 
@@ -85,8 +89,12 @@ function capitalize(value: string) {
 const styles = StyleSheet.create({
   screen: {
     paddingHorizontal: 20,
+    paddingTop: 72,
   },
   title: {
+    color: palette.darkGreen,
+    fontSize: 34,
+    fontWeight: '900',
     marginBottom: 26,
   },
   segment: {
@@ -100,10 +108,10 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     color: palette.darkGreen,
     flex: 1,
-    fontSize: 22,
+    fontSize: 19,
     fontWeight: '900',
     overflow: 'hidden',
-    paddingVertical: 18,
+    paddingVertical: 15,
     textAlign: 'center',
   },
   segmentActive: {
@@ -113,7 +121,7 @@ const styles = StyleSheet.create({
   },
   list: {
     gap: 18,
-    paddingBottom: 32,
+    paddingBottom: 116,
   },
   visitCard: {
     gap: 18,
@@ -126,8 +134,9 @@ const styles = StyleSheet.create({
   date: {
     color: palette.muted,
     flex: 1,
-    fontSize: 17,
-    fontWeight: '700',
+    fontSize: 16,
+    fontWeight: '800',
+    textAlign: 'right',
   },
   visitBody: {
     alignItems: 'center',
@@ -139,22 +148,27 @@ const styles = StyleSheet.create({
   },
   visitTitle: {
     color: palette.darkGreen,
-    fontSize: 24,
+    fontSize: 23,
     fontWeight: '900',
   },
   petName: {
     color: palette.muted,
-    fontSize: 18,
+    fontSize: 17,
     marginTop: 4,
   },
   metaRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 22,
+    gap: 18,
   },
   meta: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 6,
+  },
+  metaText: {
     color: palette.muted,
-    fontSize: 18,
-    fontWeight: '700',
+    fontSize: 16,
+    fontWeight: '800',
   },
 });

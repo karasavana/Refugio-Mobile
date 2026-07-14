@@ -5,6 +5,7 @@ export type AppointmentType = 'consultation' | 'follow_up' | 'vaccination' | 'gr
 export type AppointmentStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled';
 export type NotificationType = 'appointment' | 'vaccination' | 'stock_alert' | 'lab_result' | 'new_booking';
 export type NotificationChannel = 'web' | 'push' | 'both';
+export type LabStatus = 'pending' | 'processing' | 'completed' | 'cancelled';
 
 export type User = {
   id: number;
@@ -21,11 +22,11 @@ export type Pet = {
   owner_id: number;
   name: string;
   species: string;
-  breed: string;
+  breed: string | null;
   sex: 'male' | 'female';
-  birthdate: string;
-  color: string;
-  weight: number;
+  birthdate: string | null;
+  color: string | null;
+  weight: number | null;
   photo_path: string | null;
   status: PetStatus;
 };
@@ -69,25 +70,56 @@ export type Vaccination = {
 
 export type Prescription = {
   id: number;
-  pet_id: number;
   medical_record_id: number;
   veterinarian_id: number;
   date_prescribed: string;
-  medicine: string;
+  notes: string | null;
+};
+
+export type Medicine = {
+  id: number;
+  name: string;
+  category: string | null;
+  unit: string;
+  description: string | null;
+  reorder_level: number;
+  requires_prescription: boolean;
+  status: 'active' | 'discontinued';
+};
+
+export type PrescriptionItem = {
+  id: number;
+  prescription_id: number;
+  medicine_id: number;
   dosage: string;
   quantity: number;
-  instructions: string;
+  instructions: string | null;
+};
+
+export type LabTest = {
+  id: number;
+  name: string;
+  description: string | null;
+  price: number | null;
+};
+
+export type LabRequest = {
+  id: number;
+  pet_id: number;
+  veterinarian_id: number;
+  appointment_id: number | null;
+  lab_test_id: number;
+  request_date: string;
+  status: LabStatus;
 };
 
 export type LabResult = {
   id: number;
-  pet_id: number;
   lab_request_id: number;
-  test_name: string;
-  status: 'pending' | 'processing' | 'completed' | 'cancelled';
   result_details: string | null;
   file_attachment: string | null;
   date_released: string | null;
+  released_by: number | null;
 };
 
 export type AppNotification = {
@@ -104,22 +136,27 @@ export type AppNotification = {
 
 export const palette = {
   green: '#18C978',
+  greenDark: '#0C8E5A',
   darkGreen: '#0B3428',
-  shadowGreen: '#0B9860',
-  mint: '#D7F8E9',
-  paleMint: '#F1FBF6',
-  muted: '#6F9183',
-  line: '#CDEDDD',
+  mint: '#DFF7EE',
+  mintStrong: '#C7F1E6',
+  paleMint: '#F3FCF8',
+  muted: '#73A18F',
+  line: '#D3EFE4',
   yellow: '#FFC83D',
+  yellowPale: '#FFF6D8',
   blue: '#27ACE0',
+  bluePale: '#E2F4FF',
   red: '#FF5964',
+  redPale: '#FFECEF',
   purple: '#A981F7',
   white: '#FFFFFF',
+  ink: '#12382E',
 };
 
 export const currentUser: User = {
   id: 1,
-  name: 'Juan dela Cruz',
+  name: 'Maria Santos',
   email: 'you@email.com',
   role: 'pet_owner',
   contact_number: '+63 917 123 4567',
@@ -134,7 +171,7 @@ export const vets: User[] = [
     email: 'rvillanueva@refugio.vet',
     role: 'veterinarian',
     contact_number: '+63 917 222 0101',
-    address: 'Refugio Animal Clinic',
+    address: 'Refugio Veterinary Clinic',
     status: 'active',
   },
   {
@@ -143,7 +180,7 @@ export const vets: User[] = [
     email: 'santos@refugio.vet',
     role: 'veterinarian',
     contact_number: '+63 917 222 0102',
-    address: 'Refugio Animal Clinic',
+    address: 'Refugio Veterinary Clinic',
     status: 'active',
   },
 ];
@@ -154,11 +191,11 @@ export const pets: Pet[] = [
     owner_id: currentUser.id,
     name: 'Bantay',
     species: 'Dog',
-    breed: 'Aspin',
+    breed: 'Aspin Mix',
     sex: 'male',
-    birthdate: '2023-03-15',
-    color: 'Brown & White',
-    weight: 12.5,
+    birthdate: '2023-03-05',
+    color: 'Brown / White',
+    weight: 12.4,
     photo_path: null,
     status: 'active',
   },
@@ -167,7 +204,7 @@ export const pets: Pet[] = [
     owner_id: currentUser.id,
     name: 'Mimi',
     species: 'Cat',
-    breed: 'Puspin',
+    breed: 'Domestic Shorthair',
     sex: 'female',
     birthdate: '2024-04-09',
     color: 'Calico',
@@ -184,7 +221,7 @@ export const appointments: Appointment[] = [
     owner_id: currentUser.id,
     veterinarian_id: 2,
     staff_id: null,
-    appointment_date: '2026-07-10',
+    appointment_date: '2026-07-14',
     appointment_time: '09:00',
     type: 'vaccination',
     reason: 'Annual rabies booster',
@@ -198,7 +235,7 @@ export const appointments: Appointment[] = [
     owner_id: currentUser.id,
     veterinarian_id: 3,
     staff_id: null,
-    appointment_date: '2026-07-14',
+    appointment_date: '2026-07-18',
     appointment_time: '14:00',
     type: 'consultation',
     reason: 'Annual wellness check',
@@ -220,6 +257,20 @@ export const appointments: Appointment[] = [
     notes: null,
     updated_at: '2026-07-08T08:30:00Z',
   },
+  {
+    id: 104,
+    pet_id: 1,
+    owner_id: currentUser.id,
+    veterinarian_id: 2,
+    staff_id: 4,
+    appointment_date: '2026-04-12',
+    appointment_time: '09:30',
+    type: 'vaccination',
+    reason: 'DHPP booster',
+    status: 'completed',
+    notes: null,
+    updated_at: '2026-04-12T03:00:00Z',
+  },
 ];
 
 export const medicalRecords: MedicalRecord[] = [
@@ -229,9 +280,9 @@ export const medicalRecords: MedicalRecord[] = [
     veterinarian_id: 2,
     appointment_id: 101,
     diagnosis: 'Healthy; rabies booster administered.',
-    treatment_notes: 'Monitor injection site. Keep regular annual booster schedule.',
-    visit_date: '2026-07-10',
-    follow_up_date: '2027-07-10',
+    treatment_notes: 'Monitor injection site and continue annual booster schedule.',
+    visit_date: '2026-07-14',
+    follow_up_date: '2027-07-14',
     weight_at_visit: 12.4,
   },
   {
@@ -241,8 +292,8 @@ export const medicalRecords: MedicalRecord[] = [
     appointment_id: 102,
     diagnosis: 'Healthy wellness exam.',
     treatment_notes: 'Continue balanced diet and hydration.',
-    visit_date: '2026-07-14',
-    follow_up_date: '2027-01-14',
+    visit_date: '2026-07-18',
+    follow_up_date: '2027-01-18',
     weight_at_visit: 4.1,
   },
 ];
@@ -253,17 +304,17 @@ export const vaccinations: Vaccination[] = [
     pet_id: 1,
     veterinarian_id: 2,
     vaccine_name: 'Rabies Booster',
-    date_administered: '2026-07-10',
-    next_due_date: '2027-07-10',
+    date_administered: '2026-07-14',
+    next_due_date: '2027-07-14',
     notes: 'Annual booster.',
   },
   {
     id: 302,
     pet_id: 1,
     veterinarian_id: 2,
-    vaccine_name: '5-in-1 DHPP',
-    date_administered: '2026-04-12',
-    next_due_date: '2027-04-12',
+    vaccine_name: 'DHPP',
+    date_administered: '2026-01-10',
+    next_due_date: '2027-01-10',
     notes: null,
   },
   {
@@ -277,76 +328,120 @@ export const vaccinations: Vaccination[] = [
   },
 ];
 
-export const prescriptions: Prescription[] = [
+export const medicines: Medicine[] = [
   {
     id: 401,
-    pet_id: 1,
+    name: 'Multivitamin syrup',
+    category: 'Vitamin',
+    unit: 'mL',
+    description: 'Daily supplement',
+    reorder_level: 5,
+    requires_prescription: false,
+    status: 'active',
+  },
+];
+
+export const prescriptions: Prescription[] = [
+  {
+    id: 501,
     medical_record_id: 201,
     veterinarian_id: 2,
-    date_prescribed: '2026-07-10',
-    medicine: 'Multivitamin syrup',
+    date_prescribed: '2026-07-14',
+    notes: 'Give after meals.',
+  },
+];
+
+export const prescriptionItems: PrescriptionItem[] = [
+  {
+    id: 601,
+    prescription_id: 501,
+    medicine_id: 401,
     dosage: '5 mL once daily',
     quantity: 1,
     instructions: 'Give after meals for 7 days.',
   },
 ];
 
-export const labResults: LabResult[] = [
+export const labTests: LabTest[] = [
   {
-    id: 501,
-    pet_id: 1,
-    lab_request_id: 601,
-    test_name: 'CBC',
-    status: 'completed',
-    result_details: 'Within normal range.',
-    file_attachment: 'lab-results/bantay-cbc.pdf',
-    date_released: '2026-06-21',
+    id: 701,
+    name: 'CBC - Complete Blood Count',
+    description: 'Routine blood screening',
+    price: 450,
   },
   {
-    id: 502,
+    id: 702,
+    name: 'Fecalysis',
+    description: 'Stool sample analysis',
+    price: 250,
+  },
+];
+
+export const labRequests: LabRequest[] = [
+  {
+    id: 801,
+    pet_id: 1,
+    veterinarian_id: 2,
+    appointment_id: 101,
+    lab_test_id: 701,
+    request_date: '2026-07-10',
+    status: 'completed',
+  },
+  {
+    id: 802,
     pet_id: 2,
-    lab_request_id: 602,
-    test_name: 'Fecalysis',
+    veterinarian_id: 3,
+    appointment_id: 102,
+    lab_test_id: 702,
+    request_date: '2026-07-18',
     status: 'processing',
-    result_details: null,
-    file_attachment: null,
-    date_released: null,
+  },
+];
+
+export const labResults: LabResult[] = [
+  {
+    id: 901,
+    lab_request_id: 801,
+    result_details: 'Within normal range.',
+    file_attachment: 'lab-results/bantay-cbc.pdf',
+    date_released: '2026-07-10',
+    released_by: 3,
   },
 ];
 
 export const notifications: AppNotification[] = [
   {
-    id: 701,
+    id: 1001,
     user_id: currentUser.id,
     type: 'vaccination',
     channel: 'both',
-    message: "Bantay's Rabies Booster is due in 2 weeks.",
+    message: "Bantay's deworming is due this week.",
     read_at: null,
-    scheduled_at: '2026-06-26T08:00:00Z',
-    sent_at: '2026-06-26T08:00:00Z',
-    created_at: '2026-06-26T08:00:00Z',
+    scheduled_at: '2026-07-14T08:00:00Z',
+    sent_at: '2026-07-14T08:00:00Z',
+    created_at: '2026-07-14T08:00:00Z',
   },
   {
-    id: 702,
+    id: 1002,
     user_id: currentUser.id,
     type: 'appointment',
     channel: 'push',
-    message: 'Your appointment for Mimi is confirmed for Jul 14 at 2:00 PM.',
+    message: 'Your appointment for Mimi is confirmed for Jul 18 at 2:00 PM.',
     read_at: '2026-07-02T10:30:00Z',
     scheduled_at: null,
     sent_at: '2026-07-02T10:00:00Z',
     created_at: '2026-07-02T10:00:00Z',
   },
   {
-    id: 703,
+    id: 1003,
     user_id: currentUser.id,
     type: 'lab_result',
     channel: 'both',
     message: "Bantay's CBC result is ready to view.",
     read_at: null,
     scheduled_at: null,
-    sent_at: '2026-06-21T15:15:00Z',
-    created_at: '2026-06-21T15:15:00Z',
+    sent_at: '2026-07-10T15:15:00Z',
+    created_at: '2026-07-10T15:15:00Z',
   },
 ];
 
@@ -355,25 +450,32 @@ export const serviceOptions: {
   label: string;
   icon: string;
   color: string;
+  backgroundColor: string;
 }[] = [
-  { type: 'consultation', label: 'Consultation', icon: 'medical', color: palette.green },
-  { type: 'follow_up', label: 'Follow-up', icon: 'calendar', color: palette.blue },
-  { type: 'vaccination', label: 'Vaccination', icon: 'eyedrop', color: palette.yellow },
-  { type: 'grooming', label: 'Grooming', icon: 'cut', color: palette.purple },
-  { type: 'surgery', label: 'Surgery', icon: 'pulse', color: palette.red },
+  { type: 'consultation', label: 'Consultation', icon: 'medkit-outline', color: palette.muted, backgroundColor: palette.mint },
+  { type: 'follow_up', label: 'Follow-up', icon: 'calendar-outline', color: palette.muted, backgroundColor: palette.mint },
+  { type: 'vaccination', label: 'Vaccination', icon: 'eyedrop-outline', color: palette.green, backgroundColor: palette.mintStrong },
+  { type: 'grooming', label: 'Grooming', icon: 'cut-outline', color: palette.muted, backgroundColor: palette.mint },
+  { type: 'surgery', label: 'Surgery', icon: 'pulse-outline', color: palette.muted, backgroundColor: palette.mint },
 ];
+
+export const carePath = [
+  { id: 'checkup', title: 'First Check-up', state: 'done' },
+  { id: 'rabies', title: 'Rabies Booster', state: 'done' },
+  { id: 'deworming', title: 'Deworming', state: 'current' },
+  { id: 'wellness', title: 'Annual Wellness', state: 'locked' },
+  { id: 'dental', title: 'Dental Cleaning', state: 'locked' },
+] as const;
 
 export const formatDate = (isoDate: string) =>
   new Intl.DateTimeFormat('en-US', {
-    weekday: 'short',
-    month: 'short',
+    month: 'long',
     day: 'numeric',
     year: 'numeric',
   }).format(new Date(`${isoDate}T00:00:00`));
 
 export const formatShortDate = (isoDate: string) =>
   new Intl.DateTimeFormat('en-US', {
-    weekday: 'short',
     month: 'short',
     day: 'numeric',
   }).format(new Date(`${isoDate}T00:00:00`));
@@ -396,7 +498,9 @@ export const getInitials = (name: string) =>
     .slice(0, 2)
     .toUpperCase();
 
-export const getAge = (birthdate: string) => {
+export const getAge = (birthdate: string | null) => {
+  if (!birthdate) return 'Unknown';
+
   const birth = new Date(`${birthdate}T00:00:00`);
   const now = new Date('2026-07-14T00:00:00');
   let age = now.getFullYear() - birth.getFullYear();
@@ -411,6 +515,21 @@ export const getAge = (birthdate: string) => {
 
 export const findPet = (petId: number) => pets.find((pet) => pet.id === petId);
 export const findVet = (vetId: number) => vets.find((vet) => vet.id === vetId);
+export const findMedicalRecord = (recordId: number) => medicalRecords.find((record) => record.id === recordId);
+export const findMedicine = (medicineId: number) => medicines.find((medicine) => medicine.id === medicineId);
+export const findLabTest = (testId: number) => labTests.find((test) => test.id === testId);
+export const findLabResult = (requestId: number) => labResults.find((result) => result.lab_request_id === requestId);
 
 export const getServiceLabel = (type: AppointmentType) =>
   serviceOptions.find((service) => service.type === type)?.label ?? type;
+
+export const getPetPrescriptions = (petId: number) => {
+  const recordIds = medicalRecords.filter((record) => record.pet_id === petId).map((record) => record.id);
+  return prescriptions.filter((prescription) => recordIds.includes(prescription.medical_record_id));
+};
+
+export const getPrescriptionItems = (prescriptionId: number) =>
+  prescriptionItems.filter((item) => item.prescription_id === prescriptionId);
+
+export const getPetLabRequests = (petId: number) =>
+  labRequests.filter((request) => request.pet_id === petId);
