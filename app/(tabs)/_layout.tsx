@@ -1,66 +1,89 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
-import { Tabs } from 'expo-router';
-import React from 'react';
+// Bottom navigation layout - notifications tab removed to eliminate redundancy
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { Tabs } from "expo-router";
+import React from "react";
 
-import { HapticTab } from '@/components/haptic-tab';
-import { palette } from '@/constants/refugio';
+import { HapticTab } from "@/components/haptic-tab";
+import {
+    borderRadius,
+    palette,
+    shadow,
+    spacing,
+    typography,
+} from "@/constants/refugio";
 
 export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: palette.green,
-        tabBarInactiveTintColor: palette.muted,
+        tabBarInactiveTintColor: palette.gray400,
         tabBarStyle: {
           backgroundColor: palette.white,
-          borderTopColor: palette.line,
-          height: 88,
-          paddingBottom: 12,
-          paddingTop: 10,
+          borderTopWidth: 0,
+          height: 72,
+          paddingBottom: spacing.sm,
+          paddingTop: spacing.sm,
+          ...shadow.md,
+        },
+        tabBarItemStyle: {
+          borderRadius: borderRadius.xl,
+          marginHorizontal: 2,
+          paddingTop: spacing.xs,
         },
         tabBarLabelStyle: {
-          fontSize: 13,
-          fontWeight: '800',
+          ...typography.labelSmall,
+          fontWeight: "600",
         },
         headerShown: false,
         tabBarButton: HapticTab,
-      }}>
+      }}
+    >
       <Tabs.Screen
         name="home"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <Ionicons size={29} name="home-outline" color={color} />,
+          title: "Home",
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons
+              size={24}
+              name={focused ? "home" : "home-outline"}
+              color={color}
+            />
+          ),
         }}
       />
       <Tabs.Screen
         name="pets"
         options={{
-          title: 'Pets',
-          tabBarIcon: ({ color }) => <Ionicons size={30} name="paw-outline" color={color} />,
+          title: "Pets",
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons
+              size={24}
+              name={focused ? "paw" : "paw-outline"}
+              color={color}
+            />
+          ),
         }}
       />
       <Tabs.Screen
         name="book"
         options={{
-          title: '',
+          title: "",
           tabBarIcon: () => (
             <Ionicons
-              size={42}
+              size={28}
               name="add"
               color={palette.white}
               style={{
                 backgroundColor: palette.green,
-                borderRadius: 36,
-                height: 72,
-                lineHeight: 72,
-                marginBottom: 26,
-                overflow: 'hidden',
-                shadowColor: palette.greenDark,
-                shadowOffset: { width: 0, height: 8 },
-                shadowOpacity: 1,
-                shadowRadius: 0,
-                textAlign: 'center',
-                width: 72,
+                borderRadius: borderRadius.full,
+                height: 56,
+                lineHeight: 56,
+                marginBottom: spacing.md,
+                overflow: "hidden",
+                ...shadow.md,
+                textAlign: "center",
+                width: 56,
               }}
             />
           ),
@@ -69,15 +92,33 @@ export default function TabLayout() {
       <Tabs.Screen
         name="visits"
         options={{
-          title: 'Visits',
-          tabBarIcon: ({ color }) => <Ionicons size={29} name="calendar-outline" color={color} />,
+          title: "Visits",
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons
+              size={24}
+              name={focused ? "calendar" : "calendar-outline"}
+              color={color}
+            />
+          ),
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
-          title: 'Me',
-          tabBarIcon: ({ color }) => <Ionicons size={29} name="person-outline" color={color} />,
+          title: "Me",
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons
+              size={24}
+              name={focused ? "person" : "person-outline"}
+              color={color}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="notifications"
+        options={{
+          href: null,
         }}
       />
     </Tabs>

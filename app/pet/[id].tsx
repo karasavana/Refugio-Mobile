@@ -1,36 +1,50 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
-import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { useState } from "react";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
-import { Card, PetAvatar, Pill, Row, Screen } from '@/components/refugio-ui';
+import { Card, PetAvatar, Pill, Row, Screen } from "@/components/refugio-ui";
 import {
-  currentUser,
-  findLabResult,
-  findLabTest,
-  findMedicine,
-  findVet,
-  formatDate,
-  getAge,
-  getPetLabRequests,
-  getPetPrescriptions,
-  getPrescriptionItems,
-  labResults,
-  medicalRecords,
-  palette,
-  pets,
-  vaccinations,
-} from '@/constants/refugio';
+    capitalize,
+    currentUser,
+    findLabResult,
+    findLabTest,
+    findMedicine,
+    findVet,
+    formatDate,
+    getAge,
+    getPetLabRequests,
+    getPetPrescriptions,
+    getPrescriptionItems,
+    labResults,
+    medicalRecords,
+    palette,
+    pets,
+    vaccinations,
+} from "@/constants/refugio";
 
-type PetTab = 'overview' | 'medical' | 'vaccinations' | 'prescriptions' | 'labs';
+type PetTab =
+  | "overview"
+  | "medical"
+  | "vaccinations"
+  | "prescriptions"
+  | "labs";
 
 export default function PetProfileScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ id: string }>();
-  const pet = pets.find((candidate) => candidate.id === Number(params.id)) ?? pets[0];
-  const [activeTab, setActiveTab] = useState<PetTab>('overview');
-  const petMedicalRecords = medicalRecords.filter((record) => record.pet_id === pet.id);
-  const petVaccinations = vaccinations.filter((vaccination) => vaccination.pet_id === pet.id);
+  const params = useLocalSearchParams<{ id: string; tab?: string }>();
+  const petId = params.id ? Number(params.id) : null;
+  const pet =
+    (petId && pets.find((candidate) => candidate.id === petId)) || pets[0];
+  const [activeTab, setActiveTab] = useState<PetTab>(
+    (params.tab as PetTab) || "overview"
+  );
+  const petMedicalRecords = medicalRecords.filter(
+    (record) => record.pet_id === pet.id,
+  );
+  const petVaccinations = vaccinations.filter(
+    (vaccination) => vaccination.pet_id === pet.id,
+  );
   const petPrescriptions = getPetPrescriptions(pet.id);
   const petLabRequests = getPetLabRequests(pet.id);
 
@@ -51,39 +65,62 @@ export default function PetProfileScreen() {
         </View>
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tabs}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.content}
+      >
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.tabs}
+        >
           {[
-            ['overview', 'Overview'],
-            ['medical', 'Medical'],
-            ['vaccinations', 'Vaccines'],
-            ['prescriptions', 'Rx'],
-            ['labs', 'Lab'],
+            ["overview", "Overview"],
+            ["medical", "Medical"],
+            ["vaccinations", "Vaccines"],
+            ["prescriptions", "Rx"],
+            ["labs", "Lab"],
           ].map(([value, label]) => (
-            <Text key={value} onPress={() => setActiveTab(value as PetTab)} style={[styles.tab, activeTab === value && styles.activeTab]}>
+            <Text
+              key={value}
+              onPress={() => setActiveTab(value as PetTab)}
+              style={[styles.tab, activeTab === value && styles.activeTab]}
+            >
               {label}
             </Text>
           ))}
         </ScrollView>
 
-        {activeTab === 'overview' ? (
+        {activeTab === "overview" ? (
           <>
             <Card style={styles.tableCard}>
               <Row label="Species" value={pet.species} />
-              <Row label="Breed" value={pet.breed ?? 'Not set'} />
+              <Row label="Breed" value={pet.breed ?? "Not set"} />
               <Row label="Sex" value={pet.sex} />
-              <Row label="Birthday" value={pet.birthdate ? formatDate(pet.birthdate) : 'Not set'} />
-              <Row label="Weight" value={pet.weight ? `${pet.weight} kg` : 'Not set'} />
-              <Row label="Color" value={pet.color ?? 'Not set'} />
+              <Row
+                label="Birthday"
+                value={pet.birthdate ? formatDate(pet.birthdate) : "Not set"}
+              />
+              <Row
+                label="Weight"
+                value={pet.weight ? `${pet.weight} kg` : "Not set"}
+              />
+              <Row label="Color" value={pet.color ?? "Not set"} />
               <Row label="Owner" value={currentUser.name} />
             </Card>
 
-            <Pressable onPress={() => router.push('/(tabs)/book')}>
+            <Pressable onPress={() => router.push("/(tabs)/book")}>
               <Card style={styles.dueCard}>
-                <Ionicons name="eyedrop-outline" color={palette.yellow} size={34} />
+                <Ionicons
+                  name="eyedrop-outline"
+                  color={palette.yellow}
+                  size={34}
+                />
                 <View style={styles.recordText}>
                   <Text style={styles.dueTitle}>Deworming due soon</Text>
-                  <Text style={styles.recordMeta}>Due July 20, 2026 - Dr. R. Villanueva</Text>
+                  <Text style={styles.recordMeta}>
+                    Due July 20, 2026 - Dr. R. Villanueva
+                  </Text>
                   <Text style={styles.bookNow}>Book now</Text>
                 </View>
               </Card>
@@ -92,15 +129,22 @@ export default function PetProfileScreen() {
             <Card style={styles.vaccineSummary}>
               <View style={styles.summaryHeader}>
                 <Text style={styles.summaryTitle}>Vaccinations</Text>
-                <Text style={styles.seeAll} onPress={() => setActiveTab('vaccinations')}>
+                <Text
+                  style={styles.seeAll}
+                  onPress={() => setActiveTab("vaccinations")}
+                >
                   See all
                 </Text>
               </View>
               {petVaccinations.slice(0, 2).map((vaccination) => (
                 <View key={vaccination.id} style={styles.summaryRow}>
                   <View>
-                    <Text style={styles.summaryItem}>{vaccination.vaccine_name}</Text>
-                    <Text style={styles.recordMeta}>Given: {formatDate(vaccination.date_administered)}</Text>
+                    <Text style={styles.summaryItem}>
+                      {vaccination.vaccine_name}
+                    </Text>
+                    <Text style={styles.recordMeta}>
+                      Given: {formatDate(vaccination.date_administered)}
+                    </Text>
                   </View>
                   <Pill>Up to Date</Pill>
                 </View>
@@ -116,8 +160,12 @@ export default function PetProfileScreen() {
                   key={request.id}
                   icon="flask-outline"
                   iconColor={palette.green}
-                  title={test?.name ?? 'Lab Test'}
-                  meta={result?.date_released ? formatDate(result.date_released) : `Status: ${request.status}`}
+                  title={test?.name ?? "Lab Test"}
+                  meta={
+                    result?.date_released
+                      ? formatDate(result.date_released)
+                      : `Status: ${request.status}`
+                  }
                   badge={capitalize(request.status)}
                   action="View"
                 />
@@ -126,20 +174,20 @@ export default function PetProfileScreen() {
           </>
         ) : null}
 
-        {activeTab === 'medical'
+        {activeTab === "medical"
           ? petMedicalRecords.map((record) => (
               <RecordCard
                 key={record.id}
                 icon="document-text-outline"
                 iconColor={palette.blue}
                 title={record.diagnosis}
-                meta={`${formatDate(record.visit_date)} - ${findVet(record.veterinarian_id)?.name ?? 'Veterinarian'}`}
-                body={record.treatment_notes ?? 'No extra treatment notes.'}
+                meta={`${formatDate(record.visit_date)} - ${findVet(record.veterinarian_id)?.name ?? "Veterinarian"}`}
+                body={record.treatment_notes ?? "No extra treatment notes."}
               />
             ))
           : null}
 
-        {activeTab === 'vaccinations'
+        {activeTab === "vaccinations"
           ? petVaccinations.map((vaccination) => (
               <RecordCard
                 key={vaccination.id}
@@ -147,44 +195,64 @@ export default function PetProfileScreen() {
                 iconColor={palette.green}
                 title={vaccination.vaccine_name}
                 meta={`Given ${formatDate(vaccination.date_administered)}`}
-                body={vaccination.next_due_date ? `Next due: ${formatDate(vaccination.next_due_date)}` : 'No next due date recorded.'}
+                body={
+                  vaccination.next_due_date
+                    ? `Next due: ${formatDate(vaccination.next_due_date)}`
+                    : "No next due date recorded."
+                }
                 badge="Up to Date"
               />
             ))
           : null}
 
-        {activeTab === 'prescriptions'
+        {activeTab === "prescriptions"
           ? petPrescriptions.map((prescription) => {
               const items = getPrescriptionItems(prescription.id);
               const firstItem = items[0];
-              const medicine = firstItem ? findMedicine(firstItem.medicine_id) : undefined;
+              const medicine = firstItem
+                ? findMedicine(firstItem.medicine_id)
+                : undefined;
 
               return (
                 <RecordCard
                   key={prescription.id}
                   icon="medical-outline"
                   iconColor={palette.red}
-                  title={medicine?.name ?? 'Prescription'}
-                  meta={firstItem ? `${firstItem.dosage} - Qty ${firstItem.quantity}` : formatDate(prescription.date_prescribed)}
-                  body={firstItem?.instructions ?? prescription.notes ?? 'No extra instructions.'}
+                  title={medicine?.name ?? "Prescription"}
+                  meta={
+                    firstItem
+                      ? `${firstItem.dosage} - Qty ${firstItem.quantity}`
+                      : formatDate(prescription.date_prescribed)
+                  }
+                  body={
+                    firstItem?.instructions ??
+                    prescription.notes ??
+                    "No extra instructions."
+                  }
                 />
               );
             })
           : null}
 
-        {activeTab === 'labs'
+        {activeTab === "labs"
           ? petLabRequests.map((request) => {
               const test = findLabTest(request.lab_test_id);
-              const result = labResults.find((candidate) => candidate.lab_request_id === request.id);
+              const result = labResults.find(
+                (candidate) => candidate.lab_request_id === request.id,
+              );
 
               return (
                 <RecordCard
                   key={request.id}
                   icon="flask-outline"
                   iconColor={palette.green}
-                  title={test?.name ?? 'Lab Test'}
-                  meta={result?.date_released ? `Released ${formatDate(result.date_released)}` : `Status: ${request.status}`}
-                  body={result?.result_details ?? 'Result is not released yet.'}
+                  title={test?.name ?? "Lab Test"}
+                  meta={
+                    result?.date_released
+                      ? `Released ${formatDate(result.date_released)}`
+                      : `Status: ${request.status}`
+                  }
+                  body={result?.result_details ?? "Result is not released yet."}
                   badge={capitalize(request.status)}
                 />
               );
@@ -220,7 +288,11 @@ function RecordCard({
       <View style={styles.recordText}>
         <View style={styles.recordTop}>
           <Text style={styles.recordTitle}>{title}</Text>
-          {badge ? <Pill tone={badge === 'Completed' ? 'neutral' : 'green'}>{badge}</Pill> : null}
+          {badge ? (
+            <Pill tone={badge === "Completed" ? "neutral" : "green"}>
+              {badge}
+            </Pill>
+          ) : null}
         </View>
         <Text style={styles.recordMeta}>{meta}</Text>
         {body ? <Text style={styles.recordBody}>{body}</Text> : null}
@@ -230,43 +302,39 @@ function RecordCard({
   );
 }
 
-function capitalize(value: string) {
-  return value[0].toUpperCase() + value.slice(1);
-}
-
 const styles = StyleSheet.create({
   screen: {
     paddingHorizontal: 0,
     paddingTop: 0,
   },
   hero: {
-    alignItems: 'center',
+    alignItems: "center",
     backgroundColor: palette.green,
     paddingBottom: 34,
     paddingTop: 72,
   },
   backButton: {
-    alignItems: 'center',
+    alignItems: "center",
     backgroundColor: palette.white,
     borderRadius: 28,
     height: 56,
-    justifyContent: 'center',
+    justifyContent: "center",
     left: 24,
-    position: 'absolute',
+    position: "absolute",
     top: 58,
     width: 56,
   },
   petName: {
     color: palette.white,
     fontSize: 34,
-    fontWeight: '900',
+    fontWeight: "900",
     marginTop: 18,
   },
   petSub: {
-    color: '#D8FAEA',
+    color: "#D8FAEA",
     fontSize: 18,
     marginTop: 8,
-    textTransform: 'capitalize',
+    textTransform: "capitalize",
   },
   heroPill: {
     marginTop: 22,
@@ -287,8 +355,8 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     color: palette.muted,
     fontSize: 18,
-    fontWeight: '900',
-    overflow: 'hidden',
+    fontWeight: "900",
+    overflow: "hidden",
     paddingHorizontal: 22,
     paddingVertical: 12,
   },
@@ -301,65 +369,65 @@ const styles = StyleSheet.create({
     paddingBottom: 0,
   },
   dueCard: {
-    alignItems: 'center',
+    alignItems: "center",
     backgroundColor: palette.yellowPale,
     borderColor: palette.yellow,
     borderRadius: 28,
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 16,
   },
   dueTitle: {
     color: palette.darkGreen,
     fontSize: 19,
-    fontWeight: '900',
+    fontWeight: "900",
   },
   bookNow: {
     color: palette.blue,
     fontSize: 16,
-    fontWeight: '900',
+    fontWeight: "900",
     marginTop: 5,
   },
   vaccineSummary: {
     gap: 14,
   },
   summaryHeader: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   summaryTitle: {
     color: palette.darkGreen,
     fontSize: 22,
-    fontWeight: '900',
+    fontWeight: "900",
   },
   seeAll: {
     color: palette.blue,
     fontSize: 16,
-    fontWeight: '900',
+    fontWeight: "900",
   },
   summaryRow: {
-    alignItems: 'center',
+    alignItems: "center",
     borderTopColor: palette.line,
     borderTopWidth: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     paddingTop: 14,
   },
   summaryItem: {
     color: palette.darkGreen,
     fontSize: 18,
-    fontWeight: '900',
+    fontWeight: "900",
   },
   recordCard: {
-    alignItems: 'center',
-    flexDirection: 'row',
+    alignItems: "center",
+    flexDirection: "row",
     gap: 16,
   },
   recordIcon: {
-    alignItems: 'center',
+    alignItems: "center",
     borderRadius: 34,
     height: 68,
-    justifyContent: 'center',
+    justifyContent: "center",
     width: 68,
   },
   recordText: {
@@ -367,22 +435,22 @@ const styles = StyleSheet.create({
     gap: 5,
   },
   recordTop: {
-    alignItems: 'flex-start',
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    alignItems: "flex-start",
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: 10,
-    justifyContent: 'space-between',
+    justifyContent: "space-between",
   },
   recordTitle: {
     color: palette.darkGreen,
     flex: 1,
     fontSize: 19,
-    fontWeight: '900',
+    fontWeight: "900",
   },
   recordMeta: {
     color: palette.muted,
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: "700",
   },
   recordBody: {
     color: palette.darkGreen,

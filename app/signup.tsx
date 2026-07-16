@@ -132,9 +132,9 @@ const styles = StyleSheet.create({
   },
   title: {
     color: palette.darkGreen,
-    fontSize: 38,
-    fontWeight: '900',
-    lineHeight: 47,
+    fontSize: 20,
+    fontWeight: '700',
+    lineHeight: 28,
     textAlign: 'center',
   },
   green: {
@@ -142,12 +142,12 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     color: palette.muted,
-    fontSize: 19,
+    fontSize: 14,
   },
   error: {
     color: palette.red,
-    fontSize: 15,
-    fontWeight: '800',
+    fontSize: 12,
+    fontWeight: '600',
   },
   submit: {
     marginTop: 12,
@@ -165,15 +165,15 @@ const styles = StyleSheet.create({
   },
   or: {
     color: palette.muted,
-    fontSize: 18,
+    fontSize: 13,
   },
   switchText: {
     color: palette.muted,
-    fontSize: 19,
+    fontSize: 13,
     textAlign: 'center',
   },
   switchLink: {
     color: palette.blue,
-    fontWeight: '900',
+    fontWeight: '600',
   },
 });

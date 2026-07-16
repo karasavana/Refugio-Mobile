@@ -1,31 +1,176 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
 
 import { Card, IconBubble, Screen, ShadowButton } from '@/components/refugio-ui';
-import { currentUser, getInitials, notifications, palette } from '@/constants/refugio';
+import { borderRadius, currentUser, getInitials, palette, shadow, spacing, typography } from '@/constants/refugio';
 
 export default function ProfileScreen() {
   const router = useRouter();
   const [pushEnabled, setPushEnabled] = useState(true);
-  const unreadCount = notifications.filter((notification) => notification.read_at === null).length;
+  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState({
+    name: currentUser.name,
+    email: currentUser.email,
+    contact_number: currentUser.contact_number,
+    address: currentUser.address,
+  });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  function validateForm() {
+    const newErrors: Record<string, string> = {};
+
+    if (!formData.name.trim()) {
+      newErrors.name = 'Name is required';
+    }
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = 'Invalid email format';
+    }
+    if (!formData.contact_number.trim()) {
+      newErrors.contact_number = 'Phone number is required';
+    }
+    if (!formData.address.trim()) {
+      newErrors.address = 'Address is required';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  }
+
+  async function handleSave() {
+    if (!validateForm()) {
+      return;
+    }
+
+    // In production, this would make an API call to update the user profile
+    // Example:
+    // try {
+    //   const response = await fetch('/api/user/profile', {
+    //     method: 'PUT',
+    //     headers: {
+    //       'Content-Type': 'application/json',
+    //       'Authorization': `Bearer ${token}`,
+    //     },
+    //     body: JSON.stringify(formData),
+    //   });
+    //   if (!response.ok) throw new Error('Failed to update profile');
+    // } catch (error) {
+    //   Alert.alert('Error', 'Failed to update profile');
+    //   return;
+    // }
+
+    // Mock success for now
+    Alert.alert('Success', 'Profile updated successfully');
+    setIsEditing(false);
+  }
+
+  function handleCancel() {
+    setFormData({
+      name: currentUser.name,
+      email: currentUser.email,
+      contact_number: currentUser.contact_number,
+      address: currentUser.address,
+    });
+    setErrors({});
+    setIsEditing(false);
+  }
 
   return (
     <Screen style={styles.screen}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.profileHeader}>
           <View style={styles.userAvatar}>
-            <Text style={styles.userInitials}>{getInitials(currentUser.name)}</Text>
+            <Text style={styles.userInitials}>{getInitials(formData.name)}</Text>
+            {isEditing && (
+              <Pressable style={styles.editPhotoButton} onPress={() => Alert.alert('Edit Photo', 'Photo upload will be implemented with the API')}>
+                <Ionicons name="camera" color={palette.white} size={20} />
+              </Pressable>
+            )}
           </View>
-          <Text style={styles.name}>{currentUser.name}</Text>
-          <Text style={styles.email}>{currentUser.email}</Text>
+          {isEditing ? (
+            <TextInput
+              style={[styles.name, styles.editInput]}
+              value={formData.name}
+              onChangeText={(text) => setFormData({ ...formData, name: text })}
+              placeholder="Full name"
+            />
+          ) : (
+            <Text style={styles.name}>{formData.name}</Text>
+          )}
+          {isEditing ? (
+            <TextInput
+              style={[styles.email, styles.editInput]}
+              value={formData.email}
+              onChangeText={(text) => setFormData({ ...formData, email: text })}
+              placeholder="Email address"
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+          ) : (
+            <Text style={styles.email}>{formData.email}</Text>
+          )}
         </View>
 
         <Card style={styles.infoCard}>
-          <InfoRow label="Phone" value={currentUser.contact_number} />
-          <InfoRow label="Address" value={currentUser.address} last />
+          {isEditing ? (
+            <>
+              <View style={[styles.infoRow, styles.lastInfoRow]}>
+                <Text style={styles.infoLabel}>Phone</Text>
+                <TextInput
+                  style={[styles.editInput, styles.editInputInline]}
+                  value={formData.contact_number}
+                  onChangeText={(text) => setFormData({ ...formData, contact_number: text })}
+                  placeholder="Phone number"
+                  keyboardType="phone-pad"
+                />
+              </View>
+              {errors.contact_number && <Text style={styles.errorText}>{errors.contact_number}</Text>}
+              <View style={[styles.infoRow, styles.lastInfoRow]}>
+                <Text style={styles.infoLabel}>Address</Text>
+                <TextInput
+                  style={[styles.editInput, styles.editInputInline]}
+                  value={formData.address}
+                  onChangeText={(text) => setFormData({ ...formData, address: text })}
+                  placeholder="Address"
+                />
+              </View>
+              {errors.address && <Text style={styles.errorText}>{errors.address}</Text>}
+            </>
+          ) : (
+            <>
+              <InfoRow label="Phone" value={formData.contact_number} />
+              <InfoRow label="Address" value={formData.address} last />
+            </>
+          )}
         </Card>
+
+        {isEditing ? (
+          <View style={styles.editActions}>
+            <ShadowButton
+              style={styles.cancelButton}
+              onPress={handleCancel}
+              color={palette.gray400}
+            >
+              Cancel
+            </ShadowButton>
+            <ShadowButton
+              style={styles.saveButton}
+              onPress={handleSave}
+            >
+              Save
+            </ShadowButton>
+          </View>
+        ) : (
+          <ShadowButton
+            style={styles.editButton}
+            onPress={() => setIsEditing(true)}
+          >
+            Edit Profile
+          </ShadowButton>
+        )}
 
         <Text style={styles.sectionTitle}>Settings</Text>
         <SettingRow
@@ -33,7 +178,6 @@ export default function ProfileScreen() {
           title="Push Notifications"
           value={<Switch onValueChange={setPushEnabled} value={pushEnabled} trackColor={{ true: palette.green }} />}
         />
-        <SettingRow icon="mail-unread-outline" title="Unread Notifications" value={<Text style={styles.count}>{unreadCount}</Text>} />
         <SettingRow
           icon="lock-closed-outline"
           title="Change Password"
@@ -91,41 +235,52 @@ function SettingRow({
 
 const styles = StyleSheet.create({
   screen: {
-    paddingHorizontal: 20,
-    paddingTop: 70,
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.xl + spacing.sm,
   },
   content: {
-    gap: 24,
-    paddingBottom: 116,
+    gap: spacing.lg,
+    paddingBottom: spacing.xl + spacing.lg,
   },
   profileHeader: {
     alignItems: 'center',
-    gap: 8,
-    paddingTop: 6,
+    gap: spacing.sm,
+    paddingTop: spacing.xs,
   },
   userAvatar: {
     alignItems: 'center',
     backgroundColor: palette.green,
-    borderRadius: 68,
-    height: 136,
+    borderRadius: borderRadius.full,
+    height: 100,
     justifyContent: 'center',
-    marginBottom: 16,
-    width: 136,
+    marginBottom: spacing.md,
+    width: 100,
+    ...shadow.md,
+  },
+  editPhotoButton: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    backgroundColor: palette.darkGreen,
+    borderRadius: borderRadius.full,
+    height: 32,
+    width: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...shadow.sm,
   },
   userInitials: {
     color: palette.white,
-    fontSize: 38,
-    fontWeight: '900',
+    ...typography.headerLarge,
   },
   name: {
     color: palette.darkGreen,
-    fontSize: 31,
-    fontWeight: '900',
+    ...typography.headerMedium,
     textAlign: 'center',
   },
   email: {
     color: palette.muted,
-    fontSize: 18,
+    ...typography.bodyLarge,
   },
   infoCard: {
     padding: 0,
@@ -137,27 +292,26 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    padding: 20,
+    padding: spacing.md,
   },
   lastInfoRow: {
     borderBottomWidth: 0,
   },
   infoLabel: {
     color: palette.muted,
-    fontSize: 18,
+    ...typography.bodyLarge,
   },
   infoValue: {
     color: palette.darkGreen,
     flex: 1,
-    fontSize: 18,
-    fontWeight: '900',
+    ...typography.bodyLarge,
+    fontWeight: '600',
     textAlign: 'right',
   },
   sectionTitle: {
     color: palette.darkGreen,
-    fontSize: 24,
-    fontWeight: '900',
-    marginTop: 12,
+    ...typography.headerSmall,
+    marginTop: spacing.sm,
   },
   settingPressable: {
     overflow: 'hidden',
@@ -167,21 +321,54 @@ const styles = StyleSheet.create({
     borderBottomColor: palette.line,
     borderBottomWidth: 1,
     flexDirection: 'row',
-    gap: 16,
-    paddingVertical: 16,
+    gap: spacing.md,
+    paddingVertical: spacing.md,
   },
   settingTitle: {
     color: palette.darkGreen,
     flex: 1,
-    fontSize: 19,
-    fontWeight: '900',
+    ...typography.titleLarge,
   },
   count: {
     color: palette.green,
-    fontSize: 21,
-    fontWeight: '900',
+    ...typography.headerSmall,
   },
   logout: {
-    marginTop: 34,
+    marginTop: spacing.lg,
+  },
+  editInput: {
+    color: palette.darkGreen,
+    ...typography.bodyMedium,
+    padding: spacing.sm,
+    backgroundColor: palette.gray100,
+    borderRadius: borderRadius.md,
+    textAlign: 'center',
+  },
+  editInputInline: {
+    flex: 1,
+    textAlign: 'right',
+    backgroundColor: palette.gray100,
+    padding: spacing.sm,
+    borderRadius: borderRadius.md,
+    color: palette.darkGreen,
+    ...typography.bodyMedium,
+  },
+  errorText: {
+    color: palette.red,
+    ...typography.labelSmall,
+    marginTop: spacing.xs,
+  },
+  editActions: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  cancelButton: {
+    flex: 1,
+  },
+  saveButton: {
+    flex: 1,
+  },
+  editButton: {
+    marginTop: spacing.md,
   },
 });

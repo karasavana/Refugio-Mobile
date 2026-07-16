@@ -1,39 +1,69 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
-import { Link, LinkProps } from 'expo-router';
-import { PropsWithChildren } from 'react';
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { Link, LinkProps } from "expo-router";
+import { PropsWithChildren } from "react";
 import {
-  Image,
-  Pressable,
-  PressableProps,
-  StyleProp,
-  StyleSheet,
-  Text,
-  TextInput,
-  TextInputProps,
-  TextStyle,
-  View,
-  ViewStyle,
-} from 'react-native';
+    Image,
+    Pressable,
+    PressableProps,
+    StyleProp,
+    StyleSheet,
+    Text,
+    TextInput,
+    TextInputProps,
+    TextStyle,
+    View,
+    ViewStyle,
+} from "react-native";
 
-import { getInitials, palette, Pet } from '@/constants/refugio';
+import {
+    borderRadius,
+    getInitials,
+    palette,
+    Pet,
+    shadow,
+    spacing,
+    typography,
+} from "@/constants/refugio";
 
 export function Screen({
   children,
-  variant = 'light',
+  variant = "light",
   style,
 }: PropsWithChildren<{
-  variant?: 'light' | 'green';
+  variant?: "light" | "green";
   style?: StyleProp<ViewStyle>;
 }>) {
-  return <View style={[styles.screen, variant === 'green' && styles.greenScreen, style]}>{children}</View>;
+  return (
+    <View
+      style={[styles.screen, variant === "green" && styles.greenScreen, style]}
+    >
+      {children}
+    </View>
+  );
 }
 
-export function Title({ children, light, style }: PropsWithChildren<{ light?: boolean; style?: StyleProp<TextStyle> }>) {
-  return <Text style={[styles.title, light && styles.lightText, style]}>{children}</Text>;
+export function Title({
+  children,
+  light,
+  style,
+}: PropsWithChildren<{ light?: boolean; style?: StyleProp<TextStyle> }>) {
+  return (
+    <Text style={[styles.title, light && styles.lightText, style]}>
+      {children}
+    </Text>
+  );
 }
 
-export function Muted({ children, light, style }: PropsWithChildren<{ light?: boolean; style?: StyleProp<TextStyle> }>) {
-  return <Text style={[styles.muted, light && styles.lightMuted, style]}>{children}</Text>;
+export function Muted({
+  children,
+  light,
+  style,
+}: PropsWithChildren<{ light?: boolean; style?: StyleProp<TextStyle> }>) {
+  return (
+    <Text style={[styles.muted, light && styles.lightMuted, style]}>
+      {children}
+    </Text>
+  );
 }
 
 export function Card({
@@ -41,13 +71,19 @@ export function Card({
   style,
   selected,
 }: PropsWithChildren<{ style?: StyleProp<ViewStyle>; selected?: boolean }>) {
-  return <View style={[styles.card, selected && styles.selectedCard, style]}>{children}</View>;
+  return (
+    <View style={[styles.card, selected && styles.selectedCard, style]}>
+      {children}
+    </View>
+  );
 }
 
 export function Pill({
   children,
-  tone = 'green',
-}: PropsWithChildren<{ tone?: 'green' | 'yellow' | 'red' | 'blue' | 'neutral' }>) {
+  tone = "green",
+}: PropsWithChildren<{
+  tone?: "green" | "yellow" | "red" | "blue" | "neutral";
+}>) {
   const toneStyle = {
     green: styles.greenPill,
     yellow: styles.yellowPill,
@@ -60,20 +96,39 @@ export function Pill({
 }
 
 export function PetAvatar({ pet, size = 72 }: { pet: Pet; size?: number }) {
-  const uri = pet.photo_path?.startsWith('http') ? pet.photo_path : null;
+  const uri = pet.photo_path?.startsWith("http") ? pet.photo_path : null;
 
   if (uri) {
     return (
-      <View style={[styles.avatarImageWrap, { width: size, height: size, borderRadius: size / 2 }]}>
-        <Image source={{ uri }} style={{ width: size - 8, height: size - 8, borderRadius: (size - 8) / 2 }} />
+      <View
+        style={[
+          styles.avatarImageWrap,
+          { width: size, height: size, borderRadius: size / 2 },
+        ]}
+      >
+        <Image
+          source={{ uri }}
+          style={{
+            width: size - 8,
+            height: size - 8,
+            borderRadius: (size - 8) / 2,
+          }}
+        />
       </View>
     );
   }
 
   return (
-    <View style={[styles.avatar, { width: size, height: size, borderRadius: size / 2 }]}>
+    <View
+      style={[
+        styles.avatar,
+        { width: size, height: size, borderRadius: size / 2 },
+      ]}
+    >
       <Ionicons name="paw-outline" color={palette.white} size={size * 0.36} />
-      <Text style={[styles.avatarText, { fontSize: size * 0.18 }]}>{getInitials(pet.name)}</Text>
+      <Text style={[styles.avatarText, { fontSize: size * 0.18 }]}>
+        {getInitials(pet.name)}
+      </Text>
     </View>
   );
 }
@@ -90,7 +145,12 @@ export function IconBubble({
   size?: number;
 }) {
   return (
-    <View style={[styles.iconBubble, { width: size, height: size, borderRadius: size / 2, backgroundColor }]}>
+    <View
+      style={[
+        styles.iconBubble,
+        { width: size, height: size, borderRadius: size / 2, backgroundColor },
+      ]}
+    >
       <Ionicons name={name} size={size * 0.46} color={color} />
     </View>
   );
@@ -110,8 +170,25 @@ export function ShadowButton({
   }
 >) {
   return (
-    <Pressable style={({ pressed }) => [styles.button, { backgroundColor: color }, pressed && styles.pressed, style]} {...pressableProps}>
-      <Text style={[styles.buttonText, textStyle]}>{children}</Text>
+    <Pressable
+      style={({ pressed }) => [
+        styles.button,
+        { backgroundColor: color },
+        pressed && styles.pressed,
+        pressableProps.disabled && styles.buttonDisabled,
+        style,
+      ]}
+      {...pressableProps}
+    >
+      <Text
+        style={[
+          styles.buttonText,
+          pressableProps.disabled && styles.buttonTextDisabled,
+          textStyle,
+        ]}
+      >
+        {children}
+      </Text>
     </Pressable>
   );
 }
@@ -120,7 +197,10 @@ export function LinkButton({
   children,
   href,
   style,
-}: PropsWithChildren<{ href: LinkProps['href']; style?: StyleProp<ViewStyle> }>) {
+}: PropsWithChildren<{
+  href: LinkProps["href"];
+  style?: StyleProp<ViewStyle>;
+}>) {
   return (
     <Link href={href} asChild>
       <ShadowButton style={style}>{children}</ShadowButton>
@@ -172,13 +252,21 @@ export function FormField({
           autoCorrect={false}
           {...inputProps}
         />
-        {rightIcon ? <Ionicons name={rightIcon} color={palette.muted} size={25} /> : null}
+        {rightIcon ? (
+          <Ionicons name={rightIcon} color={palette.muted} size={25} />
+        ) : null}
       </View>
     </View>
   );
 }
 
-export function BrandIcon({ size = 126, muted = false }: { size?: number; muted?: boolean }) {
+export function BrandIcon({
+  size = 126,
+  muted = false,
+}: {
+  size?: number;
+  muted?: boolean;
+}) {
   return (
     <View
       style={[
@@ -187,16 +275,19 @@ export function BrandIcon({ size = 126, muted = false }: { size?: number; muted?
           width: size,
           height: size,
           borderRadius: size * 0.24,
-          backgroundColor: muted ? 'rgba(255,255,255,0.16)' : palette.green,
+          backgroundColor: muted ? "rgba(255,255,255,0.16)" : palette.green,
         },
-      ]}>
+      ]}
+    >
       <Ionicons name="paw-outline" color={palette.white} size={size * 0.46} />
     </View>
   );
 }
 
 export function AuthBrand() {
-  return <Text style={styles.authBrand}>REFUGIO VETERINARY CLINIC - TUBIGON</Text>;
+  return (
+    <Text style={styles.authBrand}>REFUGIO VETERINARY CLINIC - TUBIGON</Text>
+  );
 }
 
 export const styles = StyleSheet.create({
@@ -211,17 +302,14 @@ export const styles = StyleSheet.create({
   },
   title: {
     color: palette.darkGreen,
-    fontSize: 34,
-    fontWeight: '900',
-    letterSpacing: 0,
+    ...typography.headerMedium,
   },
   lightText: {
     color: palette.white,
   },
   muted: {
     color: palette.muted,
-    fontSize: 16,
-    lineHeight: 23,
+    ...typography.bodyLarge,
   },
   lightMuted: {
     color: palette.mint,
@@ -229,36 +317,32 @@ export const styles = StyleSheet.create({
   card: {
     backgroundColor: palette.white,
     borderColor: palette.line,
-    borderRadius: 32,
-    borderWidth: 1.5,
-    padding: 20,
-    shadowColor: palette.mint,
-    shadowOffset: { width: 0, height: 14 },
-    shadowOpacity: 0.4,
-    shadowRadius: 18,
-    elevation: 2,
+    borderRadius: borderRadius.lg,
+    borderWidth: 1,
+    padding: spacing.md,
+    ...shadow.sm,
   },
   selectedCard: {
-    backgroundColor: palette.mintStrong,
+    backgroundColor: palette.paleMint,
     borderColor: palette.green,
-    borderWidth: 3,
+    borderWidth: 1,
+    ...shadow.sm,
   },
   pill: {
-    alignSelf: 'flex-start',
-    borderRadius: 999,
-    fontSize: 15,
-    fontWeight: '900',
-    overflow: 'hidden',
-    paddingHorizontal: 14,
-    paddingVertical: 7,
+    alignSelf: "flex-start",
+    borderRadius: borderRadius.full,
+    ...typography.labelMedium,
+    overflow: "hidden",
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
   },
   greenPill: {
-    backgroundColor: '#D4F6E3',
-    color: palette.greenDark,
+    backgroundColor: "#D4F6E3",
+    color: palette.darkGreen,
   },
   yellowPill: {
     backgroundColor: palette.yellowPale,
-    color: '#C99400',
+    color: "#C99400",
   },
   redPill: {
     backgroundColor: palette.redPale,
@@ -269,105 +353,105 @@ export const styles = StyleSheet.create({
     color: palette.blue,
   },
   neutralPill: {
-    backgroundColor: '#EEF7F2',
+    backgroundColor: "#EEF7F2",
     color: palette.muted,
   },
   avatar: {
-    alignItems: 'center',
+    alignItems: "center",
     backgroundColor: palette.green,
     gap: 2,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   avatarImageWrap: {
-    alignItems: 'center',
+    alignItems: "center",
     backgroundColor: palette.green,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   avatarText: {
     color: palette.white,
-    fontWeight: '900',
+    fontWeight: "900",
     letterSpacing: 0,
   },
   iconBubble: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   button: {
-    alignItems: 'center',
+    alignItems: "center",
     backgroundColor: palette.green,
-    borderRadius: 32,
-    justifyContent: 'center',
-    minHeight: 64,
-    paddingHorizontal: 24,
-    shadowColor: palette.greenDark,
-    shadowOffset: { width: 0, height: 9 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 6,
+    borderRadius: borderRadius.lg,
+    justifyContent: "center",
+    minHeight: 52,
+    paddingHorizontal: spacing.lg,
+    ...shadow.md,
+  },
+  buttonDisabled: {
+    backgroundColor: palette.gray200,
   },
   pressed: {
-    opacity: 0.86,
-    transform: [{ translateY: 2 }],
+    opacity: 0.92,
+    transform: [{ scale: 0.985 }],
   },
   buttonText: {
     color: palette.white,
-    fontSize: 21,
-    fontWeight: '900',
+    ...typography.titleMedium,
+    fontWeight: "700",
+  },
+  buttonTextDisabled: {
+    color: palette.gray500,
   },
   row: {
-    alignItems: 'center',
+    alignItems: "center",
     borderBottomColor: palette.line,
     borderBottomWidth: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     paddingVertical: 16,
   },
   rowLabelWrap: {
-    alignItems: 'center',
-    flexDirection: 'row',
+    alignItems: "center",
+    flexDirection: "row",
     gap: 10,
   },
   rowLabel: {
     color: palette.muted,
-    fontSize: 17,
+    ...typography.bodyLarge,
   },
   rowValue: {
     color: palette.darkGreen,
     flex: 1,
-    fontSize: 17,
-    fontWeight: '900',
-    textAlign: 'right',
-    textTransform: 'capitalize',
+    ...typography.bodyLarge,
+    fontWeight: "600",
+    textAlign: "right",
+    textTransform: "capitalize",
   },
   fieldWrap: {
     gap: 12,
   },
   fieldLabel: {
     color: palette.darkGreen,
-    fontSize: 19,
-    fontWeight: '900',
+    ...typography.titleMedium,
   },
   inputShell: {
-    alignItems: 'center',
-    backgroundColor: '#EDF9F4',
+    alignItems: "center",
+    backgroundColor: palette.paleMint,
     borderColor: palette.line,
-    borderRadius: 30,
-    borderWidth: 1.5,
-    flexDirection: 'row',
-    gap: 16,
-    minHeight: 68,
-    paddingHorizontal: 22,
+    borderRadius: borderRadius.md,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: spacing.sm,
+    minHeight: 48,
+    paddingHorizontal: spacing.md,
   },
   input: {
     color: palette.darkGreen,
     flex: 1,
-    fontSize: 20,
-    fontWeight: '600',
+    ...typography.bodyLarge,
   },
   brandIcon: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: palette.greenDark,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: palette.darkGreen,
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 1,
     shadowRadius: 0,
@@ -376,8 +460,8 @@ export const styles = StyleSheet.create({
   authBrand: {
     color: palette.green,
     fontSize: 16,
-    fontWeight: '900',
+    fontWeight: "900",
     letterSpacing: 0.3,
-    textAlign: 'center',
+    textAlign: "center",
   },
 });

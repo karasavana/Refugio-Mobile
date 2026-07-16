@@ -105,9 +105,9 @@ const styles = StyleSheet.create({
   },
   title: {
     color: palette.darkGreen,
-    fontSize: 42,
-    fontWeight: '900',
-    lineHeight: 50,
+    fontSize: 20,
+    fontWeight: '700',
+    lineHeight: 28,
     textAlign: 'center',
   },
   green: {
@@ -115,18 +115,18 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     color: palette.muted,
-    fontSize: 20,
+    fontSize: 14,
   },
   forgot: {
     color: palette.blue,
-    fontSize: 18,
-    fontWeight: '900',
+    fontSize: 13,
+    fontWeight: '600',
     textAlign: 'right',
   },
   error: {
     color: palette.red,
-    fontSize: 15,
-    fontWeight: '800',
+    fontSize: 12,
+    fontWeight: '600',
   },
   dividerRow: {
     alignItems: 'center',
@@ -141,15 +141,15 @@ const styles = StyleSheet.create({
   },
   or: {
     color: palette.muted,
-    fontSize: 18,
+    fontSize: 13,
   },
   switchText: {
     color: palette.muted,
-    fontSize: 19,
+    fontSize: 13,
     textAlign: 'center',
   },
   switchLink: {
     color: palette.blue,
-    fontWeight: '900',
+    fontWeight: '600',
   },
 });

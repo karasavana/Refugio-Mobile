@@ -1,141 +1,328 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
-import { Link, LinkProps, useRouter } from 'expo-router';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-
-import { Card, IconBubble, PetAvatar, Screen } from '@/components/refugio-ui';
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { Link, LinkProps, useRouter } from "expo-router";
+import { useState } from "react";
 import {
-  appointments,
-  carePath,
-  currentUser,
-  findPet,
-  findVet,
-  formatTime,
-  getServiceLabel,
-  notifications,
-  palette,
-  pets,
-} from '@/constants/refugio';
+    Alert,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    Text,
+    View
+} from "react-native";
+import Animated, { FadeInDown } from "react-native-reanimated";
+
+import { Card, IconBubble, PetAvatar, Screen } from "@/components/refugio-ui";
+import {
+    appointments,
+    borderRadius,
+    capitalize,
+    currentUser,
+    findPet,
+    findVet,
+    formatTime,
+    getNotificationIcon,
+    getServiceLabel,
+    notifications,
+    palette,
+    pets,
+    shadow,
+    spacing,
+    typography,
+} from "@/constants/refugio";
 
 export default function HomeScreen() {
   const router = useRouter();
-  const upcomingVisit = appointments
-    .filter((appointment) => appointment.status === 'pending' || appointment.status === 'confirmed')
-    .sort((first, second) => `${first.appointment_date} ${first.appointment_time}`.localeCompare(`${second.appointment_date} ${second.appointment_time}`))[0];
+  const upcomingVisits = appointments
+    .filter(
+      (appointment) =>
+        appointment.status === "pending" || appointment.status === "confirmed",
+    )
+    .sort((first, second) =>
+      `${first.appointment_date} ${first.appointment_time}`.localeCompare(
+        `${second.appointment_date} ${second.appointment_time}`,
+      ),
+    );
+  const upcomingVisit = upcomingVisits[0];
   const upcomingPet = upcomingVisit ? findPet(upcomingVisit.pet_id) : undefined;
-  const upcomingVet = upcomingVisit ? findVet(upcomingVisit.veterinarian_id) : undefined;
-  const reminder = notifications.find((notification) => notification.read_at === null);
+  const upcomingVet = upcomingVisit
+    ? findVet(upcomingVisit.veterinarian_id)
+    : undefined;
+  const [notificationList, setNotificationList] = useState(notifications);
+  const reminder = notificationList.find(
+    (notification) => notification.read_at === null,
+  );
+  const unreadCount = notificationList.filter(
+    (notification) => notification.read_at === null,
+  ).length;
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
 
   return (
     <Screen style={styles.screen}>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
-        <View style={styles.hero}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.content}
+      >
+        <Animated.View entering={FadeInDown.duration(400)} style={styles.hero}>
           <View>
             <Text style={styles.heroGreeting}>Good morning,</Text>
-            <Text style={styles.heroName}>{currentUser.name.split(' ')[0]}!</Text>
+            <Text style={styles.heroName}>
+              {currentUser.name.split(" ")[0]}!
+            </Text>
           </View>
-          <View style={styles.bell}>
-            <Ionicons name="notifications-outline" color={palette.green} size={26} />
-            <View style={styles.dot} />
-          </View>
-          <View style={styles.stats}>
-            <View style={styles.stat}>
-              <Ionicons name="flame-outline" color={palette.yellow} size={22} />
-              <Text style={styles.statText}>7-day streak</Text>
-            </View>
-            <View style={styles.stat}>
-              <Ionicons name="star-outline" color={palette.yellow} size={22} />
-              <Text style={styles.statText}>320 pts</Text>
-            </View>
-          </View>
-        </View>
+          <Pressable
+            onPress={() => setIsNotificationsOpen(true)}
+            style={styles.bell}
+            accessibilityLabel="Notifications"
+            accessibilityRole="button"
+            accessibilityState={{ selected: unreadCount > 0 }}
+          >
+            <Ionicons
+              name="notifications-outline"
+              color={palette.green}
+              size={26}
+            />
+            {unreadCount > 0 && <View style={styles.dot} />}
+          </Pressable>
+        </Animated.View>
 
         {reminder ? (
-          <Pressable onPress={() => router.push('/(tabs)/book')}>
-            <Card style={styles.reminder}>
-              <IconBubble name="shield-checkmark-outline" size={56} />
-              <Text style={styles.reminderText}>
-                {reminder.message} <Text style={styles.linkText}>Book now</Text>
-              </Text>
-            </Card>
-          </Pressable>
+          <Animated.View entering={FadeInDown.delay(100).duration(400)}>
+            <Pressable onPress={() => router.push("/(tabs)/book")}>
+              <Card style={styles.reminder}>
+                <IconBubble name="shield-checkmark-outline" size={56} />
+                <Text style={styles.reminderText}>
+                  {reminder.message}{" "}
+                  <Text style={styles.linkText}>Book now</Text>
+                </Text>
+              </Card>
+            </Pressable>
+          </Animated.View>
         ) : null}
 
-        <View style={styles.sectionHeader}>
+        <Animated.View
+          entering={FadeInDown.delay(200).duration(400)}
+          style={styles.sectionHeader}
+        >
           <Text style={styles.sectionTitle}>My Pets</Text>
           <Link href="/(tabs)/pets" style={styles.seeAll}>
             See all
           </Link>
-        </View>
-        <View style={styles.petStrip}>
+        </Animated.View>
+        <Animated.View
+          entering={FadeInDown.delay(300).duration(400)}
+          style={styles.petStrip}
+        >
           {pets.map((pet) => (
-            <Link key={pet.id} href={{ pathname: '/pet/[id]', params: { id: pet.id } }} asChild>
-              <Pressable style={styles.petChip}>
+            <Link
+              key={pet.id}
+              href={{ pathname: "/pet/[id]", params: { id: pet.id } }}
+              asChild
+            >
+              <Pressable
+                style={styles.petChip}
+                accessibilityLabel={`View ${pet.name}'s profile`}
+                accessibilityRole="button"
+              >
                 <PetAvatar pet={pet} size={76} />
                 <Text style={styles.petName}>{pet.name}</Text>
                 <View style={styles.petIndicator} />
               </Pressable>
             </Link>
           ))}
-          <Pressable style={styles.addPet} onPress={() => Alert.alert('Add Pet', 'Pet registration is ready for the Laravel pets endpoint.')}>
+          <Pressable
+            style={styles.addPet}
+            onPress={() =>
+              Alert.alert(
+                "Add Pet",
+                "Pet registration is ready for the Laravel pets endpoint.",
+              )
+            }
+            accessibilityLabel="Add new pet"
+            accessibilityRole="button"
+          >
             <View style={styles.addCircle}>
               <Ionicons name="add" color={palette.muted} size={34} />
             </View>
             <Text style={styles.addText}>Add Pet</Text>
           </Pressable>
-        </View>
+        </Animated.View>
 
-        {upcomingVisit && upcomingPet && upcomingVet ? (
-          <Card style={styles.visitCard}>
-            <View style={styles.visitTop}>
-              <Text style={styles.visitTitle}>Upcoming Visit</Text>
-              <Text style={styles.status}>{capitalize(upcomingVisit.status)}</Text>
+        {upcomingVisits.length > 0 ? (
+          <Animated.View entering={FadeInDown.delay(400).duration(400)}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Upcoming Visits</Text>
+              <Link href="/(tabs)/visits" style={styles.seeAll}>
+                See all
+              </Link>
             </View>
-            <View style={styles.visitBody}>
-              <View style={styles.dateBadge}>
-                <Text style={styles.dayNumber}>{new Date(`${upcomingVisit.appointment_date}T00:00:00`).getDate()}</Text>
-                <Text style={styles.month}>July</Text>
-              </View>
-              <View style={styles.visitInfo}>
-                <Text style={styles.cardTitle}>{getServiceLabel(upcomingVisit.type)}</Text>
-                <Text style={styles.cardSub}>
-                  {upcomingPet.name} - {formatTime(upcomingVisit.appointment_time)}
-                </Text>
-                <Text style={styles.cardSub}>{upcomingVet.name}</Text>
-              </View>
-            </View>
-          </Card>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.visitsScroll}
+            >
+              {upcomingVisits.slice(0, 3).map((visit) => {
+                const pet = findPet(visit.pet_id);
+                const vet = findVet(visit.veterinarian_id);
+                if (!pet || !vet) return null;
+
+                return (
+                  <Card key={visit.id} style={styles.visitCard}>
+                    <View style={styles.visitTop}>
+                      <Text style={styles.status}>
+                        {capitalize(visit.status)}
+                      </Text>
+                    </View>
+                    <View style={styles.visitBody}>
+                      <View style={styles.dateBadge}>
+                        <Text style={styles.dayNumber}>
+                          {new Date(
+                            `${visit.appointment_date}T00:00:00`,
+                          ).getDate()}
+                        </Text>
+                        <Text style={styles.month}>
+                          {new Date(
+                            `${visit.appointment_date}T00:00:00`,
+                          ).toLocaleDateString("en-US", { month: "short" })}
+                        </Text>
+                      </View>
+                      <View style={styles.visitInfo}>
+                        <Text style={styles.cardTitle}>
+                          {getServiceLabel(visit.type)}
+                        </Text>
+                        <Text style={styles.cardSub}>
+                          {pet.name} - {formatTime(visit.appointment_time)}
+                        </Text>
+                        <Text style={styles.cardSub}>{vet.name}</Text>
+                      </View>
+                    </View>
+                  </Card>
+                );
+              })}
+            </ScrollView>
+          </Animated.View>
         ) : null}
 
-        <View style={styles.careHeader}>
-          <Text style={styles.sectionTitle}>Bantay&apos;s Care Path</Text>
-          <Text style={styles.doneText}>2 / 5 done</Text>
-        </View>
-        <Card style={styles.careCard}>
-          {carePath.map((item, index) => (
-            <View key={item.id} style={styles.careRow}>
-              {index < carePath.length - 1 ? <View style={styles.careLine} /> : null}
-              <View style={[styles.careIcon, item.state === 'current' && styles.currentCareIcon, item.state === 'locked' && styles.lockedCareIcon]}>
-                <Ionicons
-                  name={item.state === 'done' ? 'checkmark' : item.state === 'current' ? 'paw-outline' : 'lock-closed-outline'}
-                  color={item.state === 'locked' ? palette.muted : palette.white}
-                  size={24}
-                />
-              </View>
-              <Text style={[styles.careText, item.state === 'locked' && styles.locked]}>{item.title}</Text>
+        <Animated.View entering={FadeInDown.delay(500).duration(400)}>
+          <Text style={styles.sectionTitle}>Quick Actions</Text>
+          <View style={styles.actions}>
+            <View style={styles.actionWrapper}>
+              <QuickAction
+                label="Book Appointment"
+                icon="calendar-outline"
+                href="/(tabs)/book"
+                color={palette.green}
+                backgroundColor={palette.mintStrong}
+              />
             </View>
-          ))}
-        </Card>
-
-        <Text style={styles.sectionTitle}>Quick Actions</Text>
-        <View style={styles.actions}>
-          <QuickAction label="Book Appointment" icon="calendar-outline" href="/(tabs)/book" color={palette.green} backgroundColor={palette.mintStrong} />
-          <QuickAction label="Medical Records" icon="document-text-outline" href="/pet/1" color={palette.blue} backgroundColor={palette.bluePale} />
-          <QuickAction label="Vaccinations" icon="eyedrop-outline" href="/pet/1" color={palette.darkGreen} backgroundColor={palette.yellowPale} />
-          <QuickAction label="Lab Results" icon="flask-outline" href="/pet/1" color={palette.red} backgroundColor={palette.redPale} />
-        </View>
+            <View style={styles.actionWrapper}>
+              <QuickAction
+                label="Medical Records"
+                icon="document-text-outline"
+                href={{ pathname: "/pet/[id]", params: { id: "1", tab: "medical" } }}
+                color={palette.blue}
+                backgroundColor={palette.bluePale}
+              />
+            </View>
+            <View style={styles.actionWrapper}>
+              <QuickAction
+                label="Vaccinations"
+                icon="eyedrop-outline"
+                href={{ pathname: "/pet/[id]", params: { id: "1", tab: "vaccinations" } }}
+                color={palette.darkGreen}
+                backgroundColor={palette.yellowPale}
+              />
+            </View>
+            <View style={styles.actionWrapper}>
+              <QuickAction
+                label="Lab Results"
+                icon="flask-outline"
+                href={{ pathname: "/pet/[id]", params: { id: "1", tab: "labs" } }}
+                color={palette.red}
+                backgroundColor={palette.redPale}
+              />
+            </View>
+          </View>
+        </Animated.View>
       </ScrollView>
+
+      {isNotificationsOpen ? (
+        <View style={styles.notificationsOverlay} pointerEvents="box-none">
+          <Pressable
+            style={styles.overlayBackdrop}
+            onPress={() => setIsNotificationsOpen(false)}
+            accessibilityLabel="Close notifications overlay"
+            accessibilityRole="button"
+          />
+          <View style={styles.notificationsModal}>
+            <View style={styles.notificationsHeader}>
+              <Text style={styles.notificationsTitle}>Notifications</Text>
+              <Text
+                style={styles.markAllRead}
+                onPress={() => {
+                  setNotificationList((prev) =>
+                    prev.map((notification) => ({
+                      ...notification,
+                      read_at: notification.read_at ?? new Date().toISOString(),
+                    })),
+                  );
+                }}
+              >
+                Mark all read
+              </Text>
+            </View>
+            <ScrollView
+              style={styles.notificationsList}
+              contentContainerStyle={styles.notificationsListContent}
+              showsVerticalScrollIndicator={false}
+            >
+              {notificationList.map((notification) => (
+                <View key={notification.id} style={styles.notificationRow}>
+                  <View style={styles.notificationBadge}>
+                    <Ionicons
+                      name={getNotificationIcon(notification.type)}
+                      color={palette.white}
+                      size={18}
+                    />
+                  </View>
+                  <View style={styles.notificationText}>
+                    <Text style={styles.notificationTitle} numberOfLines={2}>
+                      {notification.message}
+                    </Text>
+                    <Text style={styles.notificationSubtitle}>
+                      {formatRelativeTime(notification.created_at)}
+                    </Text>
+                  </View>
+                </View>
+              ))}
+            </ScrollView>
+            <Pressable
+              onPress={() => setIsNotificationsOpen(false)}
+              style={styles.closeNotifications}
+              accessibilityLabel="Close notifications"
+              accessibilityRole="button"
+            >
+              <Text style={styles.closeNotificationsText}>Close</Text>
+            </Pressable>
+          </View>
+        </View>
+      ) : null}
     </Screen>
   );
+}
+
+function formatRelativeTime(isoDate: string) {
+  const date = new Date(isoDate);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMinutes = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMinutes < 1) return "Just now";
+  if (diffMinutes < 60) return `${diffMinutes}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffDays < 7) return `${diffDays}d ago`;
+  return date.toLocaleDateString();
 }
 
 function QuickAction({
@@ -147,301 +334,328 @@ function QuickAction({
 }: {
   label: string;
   icon: keyof typeof Ionicons.glyphMap;
-  href: LinkProps['href'];
+  href: LinkProps["href"];
   color: string;
   backgroundColor: string;
 }) {
   return (
     <Link href={href} asChild>
-      <Pressable style={[styles.actionCard, { backgroundColor }]}>
-        <Ionicons name={icon} color={color} size={32} />
-        <Text style={[styles.actionText, { color }]}>{label}</Text>
+      <Pressable
+        style={({ pressed }) => [
+          styles.actionCard,
+          pressed && styles.actionPressed,
+        ]}
+        accessibilityLabel={`Quick action: ${label}`}
+        accessibilityRole="button"
+      >
+        <View
+          style={[
+            styles.actionBadge,
+            { backgroundColor: backgroundColor || palette.mint },
+          ]}
+        >
+          <Ionicons name={icon} color={color} size={20} />
+        </View>
+        <Text style={styles.actionText}>{label}</Text>
       </Pressable>
     </Link>
   );
 }
 
-function capitalize(value: string) {
-  return value[0].toUpperCase() + value.slice(1);
-}
-
 const styles = StyleSheet.create({
   screen: {
     paddingHorizontal: 0,
-    paddingTop: 34,
+    paddingTop: spacing.xl,
   },
   content: {
-    gap: 20,
-    paddingBottom: 30,
-    paddingHorizontal: 20,
+    gap: spacing.lg,
+    paddingBottom: spacing.xl,
+    paddingHorizontal: spacing.md,
   },
   hero: {
     backgroundColor: palette.green,
-    borderRadius: 34,
-    minHeight: 154,
-    padding: 24,
-    shadowColor: palette.greenDark,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
+    borderRadius: borderRadius.xxl,
+    minHeight: 140,
+    padding: spacing.lg,
+    ...shadow.lg,
   },
   heroGreeting: {
-    color: '#D6FAEA',
-    fontSize: 18,
-    fontWeight: '600',
+    color: "#D7F7EB",
+    ...typography.bodyLarge,
   },
   heroName: {
     color: palette.white,
-    fontSize: 30,
-    fontWeight: '900',
-    marginTop: 8,
+    ...typography.headerLarge,
+    marginTop: spacing.xs,
   },
   bell: {
-    alignItems: 'center',
+    alignItems: "center",
     backgroundColor: palette.white,
-    borderRadius: 28,
-    height: 58,
-    justifyContent: 'center',
-    position: 'absolute',
-    right: 24,
-    top: 30,
-    width: 58,
+    borderRadius: borderRadius.full,
+    height: 48,
+    justifyContent: "center",
+    position: "absolute",
+    right: spacing.lg,
+    top: spacing.lg,
+    width: 48,
+    ...shadow.sm,
   },
   dot: {
     backgroundColor: palette.red,
-    borderRadius: 6,
-    height: 12,
-    position: 'absolute',
+    borderRadius: borderRadius.full,
+    height: 10,
+    position: "absolute",
     right: 12,
     top: 12,
-    width: 12,
-  },
-  stats: {
-    flexDirection: 'row',
-    gap: 12,
-    marginTop: 26,
-  },
-  stat: {
-    alignItems: 'center',
-    backgroundColor: palette.white,
-    borderRadius: 999,
-    flexDirection: 'row',
-    gap: 7,
-    minWidth: 124,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-  },
-  statText: {
-    color: palette.greenDark,
-    fontSize: 13,
-    fontWeight: '900',
+    width: 10,
   },
   reminder: {
-    alignItems: 'center',
-    borderRadius: 30,
-    flexDirection: 'row',
-    gap: 16,
+    alignItems: "center",
+    borderRadius: borderRadius.lg,
+    flexDirection: "row",
+    gap: spacing.md,
   },
   reminderText: {
     color: palette.darkGreen,
     flex: 1,
-    fontSize: 18,
-    fontWeight: '700',
-    lineHeight: 25,
+    ...typography.bodyLarge,
+    fontWeight: "600",
   },
   linkText: {
     color: palette.blue,
-    fontWeight: '900',
+    fontWeight: "700",
   },
   sectionHeader: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   sectionTitle: {
     color: palette.darkGreen,
-    fontSize: 23,
-    fontWeight: '900',
+    ...typography.headerMedium,
+    marginBottom: spacing.sm,
   },
   seeAll: {
     color: palette.blue,
-    fontSize: 17,
-    fontWeight: '900',
+    ...typography.bodyLarge,
+    fontWeight: "600",
   },
   petStrip: {
-    flexDirection: 'row',
-    gap: 20,
+    flexDirection: "row",
+    gap: spacing.md,
   },
   petChip: {
-    alignItems: 'center',
-    gap: 7,
+    alignItems: "center",
+    gap: spacing.sm,
   },
   petName: {
     color: palette.darkGreen,
-    fontSize: 15,
-    fontWeight: '900',
+    ...typography.labelMedium,
+    fontWeight: "600",
   },
   petIndicator: {
     backgroundColor: palette.green,
-    borderRadius: 5,
-    height: 10,
-    width: 10,
+    borderRadius: borderRadius.sm,
+    height: 8,
+    width: 8,
   },
   addPet: {
-    alignItems: 'center',
-    gap: 8,
+    alignItems: "center",
+    gap: spacing.sm,
   },
   addCircle: {
-    alignItems: 'center',
-    backgroundColor: '#ECF9F4',
+    alignItems: "center",
+    backgroundColor: palette.paleMint,
     borderColor: palette.line,
-    borderRadius: 38,
-    borderStyle: 'dashed',
-    borderWidth: 2,
-    height: 76,
-    justifyContent: 'center',
-    width: 76,
+    borderRadius: borderRadius.full,
+    borderStyle: "dashed",
+    borderWidth: 1.5,
+    height: 72,
+    justifyContent: "center",
+    width: 72,
   },
   addText: {
     color: palette.muted,
-    fontSize: 15,
-    fontWeight: '900',
+    ...typography.labelMedium,
+    fontWeight: "600",
   },
   visitCard: {
-    gap: 16,
+    gap: spacing.md,
+    width: 280,
+    marginRight: spacing.md,
+  },
+  visitsScroll: {
+    gap: spacing.md,
+    paddingRight: spacing.md,
   },
   visitTop: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   visitTitle: {
     color: palette.darkGreen,
-    fontSize: 20,
-    fontWeight: '900',
+    ...typography.headerSmall,
   },
   status: {
-    backgroundColor: '#D4F6E3',
-    borderRadius: 999,
+    backgroundColor: palette.mintStrong,
+    borderRadius: borderRadius.full,
     color: palette.greenDark,
-    fontSize: 15,
-    fontWeight: '900',
-    overflow: 'hidden',
-    paddingHorizontal: 14,
-    paddingVertical: 7,
+    ...typography.labelMedium,
+    overflow: "hidden",
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
   },
   visitBody: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    gap: 18,
+    alignItems: "center",
+    flexDirection: "row",
+    gap: spacing.md,
   },
   dateBadge: {
-    alignItems: 'center',
+    alignItems: "center",
     backgroundColor: palette.mintStrong,
-    borderRadius: 34,
-    height: 78,
-    justifyContent: 'center',
-    width: 78,
+    borderRadius: borderRadius.lg,
+    height: 64,
+    justifyContent: "center",
+    width: 64,
   },
   dayNumber: {
     color: palette.green,
-    fontSize: 31,
-    fontWeight: '900',
+    ...typography.headerMedium,
   },
   month: {
     color: palette.green,
-    fontSize: 15,
-    fontWeight: '900',
+    ...typography.labelMedium,
   },
   visitInfo: {
     flex: 1,
   },
   cardTitle: {
     color: palette.darkGreen,
-    fontSize: 21,
-    fontWeight: '900',
+    ...typography.titleLarge,
   },
   cardSub: {
     color: palette.muted,
-    fontSize: 17,
-    fontWeight: '600',
-    marginTop: 4,
-  },
-  careHeader: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  doneText: {
-    color: palette.muted,
-    fontSize: 17,
-    fontWeight: '700',
-  },
-  careCard: {
-    backgroundColor: 'transparent',
-    borderWidth: 0,
-    elevation: 0,
-    gap: 0,
-    paddingVertical: 4,
-    shadowOpacity: 0,
-  },
-  careRow: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    minHeight: 64,
-    position: 'relative',
-  },
-  careLine: {
-    backgroundColor: palette.line,
-    height: 54,
-    left: 27,
-    position: 'absolute',
-    top: 42,
-    width: 3,
-  },
-  careIcon: {
-    alignItems: 'center',
-    backgroundColor: palette.yellow,
-    borderRadius: 28,
-    height: 56,
-    justifyContent: 'center',
-    marginRight: 18,
-    width: 56,
-    zIndex: 1,
-  },
-  currentCareIcon: {
-    backgroundColor: palette.green,
-    borderColor: palette.mintStrong,
-    borderWidth: 6,
-  },
-  lockedCareIcon: {
-    backgroundColor: '#E8F6F0',
-    borderColor: palette.line,
-    borderWidth: 4,
-  },
-  careText: {
-    color: palette.darkGreen,
-    flex: 1,
-    fontSize: 20,
-    fontWeight: '900',
-  },
-  locked: {
-    color: palette.muted,
+    ...typography.bodyMedium,
+    marginTop: spacing.xs,
   },
   actions: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 14,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    gap: spacing.sm,
+  },
+  actionWrapper: {
+    width: "48%",
   },
   actionCard: {
-    borderRadius: 30,
-    gap: 24,
-    minHeight: 124,
-    padding: 20,
-    width: '47.8%',
+    backgroundColor: palette.white,
+    borderRadius: borderRadius.xl,
+    gap: spacing.sm,
+    minHeight: 130,
+    padding: spacing.lg,
+    width: "100%",
+    ...shadow.md,
+  },
+  actionPressed: {
+    opacity: 0.92,
+    transform: [{ scale: 0.992 }],
+  },
+  actionBadge: {
+    alignItems: "center",
+    borderRadius: borderRadius.full,
+    height: 46,
+    justifyContent: "center",
+    width: 46,
   },
   actionText: {
-    fontSize: 17,
-    fontWeight: '900',
+    color: palette.darkGreen,
+    ...typography.titleSmall,
+    fontWeight: "700",
+  },
+  notificationsOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 99,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  overlayBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.4)",
+  },
+  notificationsModal: {
+    backgroundColor: palette.white,
+    borderRadius: borderRadius.xl,
+    marginHorizontal: spacing.md,
+    maxHeight: "80%",
+    minHeight: 280,
+    overflow: "hidden",
+    padding: spacing.lg,
+    width: "92%",
+    ...shadow.lg,
+  },
+  notificationsHeader: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: spacing.md,
+  },
+  notificationsTitle: {
+    color: palette.darkGreen,
+    ...typography.headerSmall,
+  },
+  markAllRead: {
+    color: palette.greenDark,
+    ...typography.labelMedium,
+    fontWeight: "700",
+  },
+  notificationsList: {
+    flexGrow: 0,
+    marginBottom: spacing.md,
+  },
+  notificationsListContent: {
+    gap: spacing.md,
+  },
+  notificationRow: {
+    alignItems: "center",
+    borderBottomColor: palette.line,
+    borderBottomWidth: 1,
+    flexDirection: "row",
+    gap: spacing.md,
+    paddingBottom: spacing.md,
+  },
+  notificationBadge: {
+    alignItems: "center",
+    backgroundColor: palette.green,
+    borderRadius: borderRadius.md,
+    height: 40,
+    justifyContent: "center",
+    width: 40,
+  },
+  notificationText: {
+    flex: 1,
+  },
+  notificationTitle: {
+    color: palette.darkGreen,
+    ...typography.bodyMedium,
+    fontWeight: "700",
+  },
+  notificationSubtitle: {
+    color: palette.muted,
+    ...typography.labelSmall,
+    marginTop: spacing.xs,
+  },
+  closeNotifications: {
+    alignItems: "center",
+    borderColor: palette.green,
+    borderRadius: borderRadius.full,
+    borderWidth: 1,
+    marginTop: spacing.sm,
+    paddingVertical: spacing.md,
+  },
+  closeNotificationsText: {
+    color: palette.green,
+    ...typography.titleMedium,
+    fontWeight: "700",
   },
 });

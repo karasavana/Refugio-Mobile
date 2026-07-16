@@ -1,31 +1,35 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
-import { Link, useRouter } from 'expo-router';
-import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { Link } from "expo-router";
+import { useState } from "react";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
-import { AuthBrand, BrandIcon, Screen, ShadowButton } from '@/components/refugio-ui';
-import { palette } from '@/constants/refugio';
+import {
+    AuthBrand,
+    BrandIcon,
+    Screen,
+    ShadowButton,
+} from "@/components/refugio-ui";
+import { palette } from "@/constants/refugio";
 
 const onboardingSlides = [
   {
-    icon: 'notifications-outline',
-    title: 'Never Miss a Reminder',
-    body: "Get nudged before a booster is due and keep your pet's wellness streak alive.",
+    icon: "notifications-outline",
+    title: "Never Miss a Reminder",
+    body: "Get nudged before a booster is due and keep your pet's care on track.",
   },
   {
-    icon: 'document-text-outline',
-    title: 'Track Records & Vaccinations',
-    body: 'See every checkup, prescription, and lab result for each pet, all in one care path.',
+    icon: "document-text-outline",
+    title: "Track Records & Vaccinations",
+    body: "See every checkup, prescription, and lab result for each pet in one secure place.",
   },
   {
-    icon: 'calendar-outline',
-    title: 'Book Visits in Seconds',
-    body: 'Pick a service, choose an open time slot, and send your request with no phone calls needed.',
+    icon: "calendar-outline",
+    title: "Book Visits in Seconds",
+    body: "Pick a service, choose an open time slot, and send your request with no phone calls needed.",
   },
 ] as const;
 
 export default function LandingScreen() {
-  const router = useRouter();
   const [slideIndex, setSlideIndex] = useState(0);
   const [showLanding, setShowLanding] = useState(false);
   const slide = onboardingSlides[slideIndex];
@@ -56,11 +60,14 @@ export default function LandingScreen() {
         <View style={styles.onboardingBottom}>
           <View style={styles.dots}>
             {onboardingSlides.map((item, index) => (
-              <View key={item.title} style={[styles.dot, index === slideIndex && styles.activeDot]} />
+              <View
+                key={item.title}
+                style={[styles.dot, index === slideIndex && styles.activeDot]}
+              />
             ))}
           </View>
           <ShadowButton style={styles.fullButton} onPress={advance}>
-            {isLastSlide ? 'Get Started' : 'Next'}
+            {isLastSlide ? "Get Started" : "Next"}
           </ShadowButton>
         </View>
       </Screen>
@@ -79,7 +86,8 @@ export default function LandingScreen() {
           Turn pet care into a <Text style={styles.green}>daily habit.</Text>
         </Text>
         <Text style={styles.subtitle}>
-          Follow your pet&apos;s care path, keep your wellness streak alive, and never miss a checkup or booster.
+          Keep your pet healthy with easy booking, complete records, and timely
+          reminders.
         </Text>
       </View>
 
@@ -92,9 +100,6 @@ export default function LandingScreen() {
             <Text style={styles.secondaryText}>Create Account</Text>
           </Pressable>
         </Link>
-        <Text style={styles.demoLink} onPress={() => router.replace('/(tabs)/home')}>
-          Continue as demo
-        </Text>
       </View>
     </Screen>
   );
@@ -106,53 +111,53 @@ const styles = StyleSheet.create({
     paddingTop: 84,
   },
   skip: {
-    alignSelf: 'flex-end',
+    alignSelf: "flex-end",
     color: palette.white,
-    fontSize: 24,
-    fontWeight: '900',
+    fontSize: 13,
+    fontWeight: "600",
   },
   slideContent: {
-    alignItems: 'center',
+    alignItems: "center",
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
     marginTop: 40,
   },
   slideIcon: {
-    alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.18)',
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.18)",
     borderRadius: 46,
     height: 176,
-    justifyContent: 'center',
+    justifyContent: "center",
     marginBottom: 54,
     width: 176,
   },
   slideTitle: {
     color: palette.darkGreen,
-    fontSize: 38,
-    fontWeight: '900',
-    lineHeight: 46,
-    marginBottom: 24,
-    textAlign: 'center',
+    fontSize: 20,
+    fontWeight: "700",
+    lineHeight: 28,
+    marginBottom: 16,
+    textAlign: "center",
   },
   slideBody: {
     color: palette.white,
-    fontSize: 22,
-    lineHeight: 34,
+    fontSize: 14,
+    lineHeight: 20,
     maxWidth: 350,
-    textAlign: 'center',
+    textAlign: "center",
   },
   onboardingBottom: {
     gap: 58,
     paddingBottom: 48,
   },
   dots: {
-    alignItems: 'center',
-    flexDirection: 'row',
+    alignItems: "center",
+    flexDirection: "row",
     gap: 12,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   dot: {
-    backgroundColor: 'rgba(255,255,255,0.45)',
+    backgroundColor: "rgba(255,255,255,0.45)",
     borderRadius: 999,
     height: 14,
     width: 14,
@@ -162,12 +167,12 @@ const styles = StyleSheet.create({
     width: 56,
   },
   fullButton: {
-    alignSelf: 'stretch',
+    alignSelf: "stretch",
     backgroundColor: palette.green,
   },
   landingScreen: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingHorizontal: 28,
   },
   logoWrap: {
@@ -175,48 +180,41 @@ const styles = StyleSheet.create({
     opacity: 0.92,
   },
   copy: {
-    alignItems: 'center',
+    alignItems: "center",
     gap: 22,
   },
   headline: {
     color: palette.darkGreen,
-    fontSize: 39,
-    fontWeight: '900',
-    lineHeight: 49,
-    textAlign: 'center',
+    fontSize: 20,
+    fontWeight: "700",
+    lineHeight: 28,
+    textAlign: "center",
   },
   green: {
     color: palette.green,
   },
   subtitle: {
     color: palette.muted,
-    fontSize: 21,
-    lineHeight: 33,
-    textAlign: 'center',
+    fontSize: 14,
+    lineHeight: 20,
+    textAlign: "center",
   },
   actions: {
-    alignSelf: 'stretch',
+    alignSelf: "stretch",
     gap: 18,
     marginTop: 56,
   },
   secondaryButton: {
-    alignItems: 'center',
+    alignItems: "center",
     borderColor: palette.line,
     borderRadius: 32,
     borderWidth: 2,
-    justifyContent: 'center',
+    justifyContent: "center",
     minHeight: 64,
   },
   secondaryText: {
     color: palette.green,
-    fontSize: 20,
-    fontWeight: '900',
-  },
-  demoLink: {
-    color: palette.blue,
-    fontSize: 16,
-    fontWeight: '900',
-    marginTop: 4,
-    textAlign: 'center',
+    fontSize: 13,
+    fontWeight: "600",
   },
 });
